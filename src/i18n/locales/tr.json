@@ -1,0 +1,62 @@
+{
+  "settings": {
+    "title": "Ayarlar",
+    "appearance": "GÖRÜNÜM",
+    "editor": "DÜZENLEYİCİ",
+    "data": "VERİ",
+    "help": "YARDIM",
+    "about": "HAKKINDA",
+    "darkMode": "Karanlık Mod",
+    "chordColor": "Akor Rengi",
+    "autoSave": "Otomatik Kaydet",
+    "chordDiagrams": "Akor Diyagramları",
+    "exportLibrary": "Kütüphaneyi Dışa Aktar",
+    "importSongs": "Şarkıları İçe Aktar",
+    "importSingleSong": "Tek Şarkı İçe Aktar",
+    "howToUseLabel": "Uygulamayı Kullanma",
+    "howToUseTitle": "Repertoire Kullanımı",
+    "chordProSyntax": "ChordPro Sözdizimi",
+    "version": "Sürüm",
+    "licenses": "Lisanslar",
+    "githubRepo": "GitHub Deposu",
+    "language": "Dil",
+    "repertoireVersionShort": "Repertoire Uygulaması v1.0.0",
+    "madeWith": "♫ ile yapıldı",
+    "exportComplete": "Dışa Aktarma Tamamlandı",
+    "exportFailed": "Dışa Aktarma Başarısız",
+    "importComplete": "İçe Aktarma Tamamlandı",
+    "importFailed": "İçe Aktarma Başarısız"
+  },
+  "help": {
+    "app": "1) Kütüphane: şarkıları gözatın, arayın, filtreleyin ve favorilere ekleyin.\n2) + butonu: yeni şarkı oluşturun.\n3) Düzenleme modu: ham ChordPro metni yazın ve Kaydet'e dokunun.\n4) Görüntüleme modu: transpoze ve şarkıya özel yazı tipi boyutu kontrolü kullanın.\n5) Ayarlar: akor rengi, otomatik kaydetme ve diyagramları özelleştirin.",
+    "chordpro": "ChordPro kısa sözdizimi:\n- Akorlar satır içi: [C]Harika [G]lütuf\n- Başlık direktifi: {title: Benim Şarkım}\n- Ton direktifi: {key: G}\n- Sanatçı direktifi: {artist: Benim Grubum}\n- Etiketler direktifi: {tags: ibadet, akustik}\n\nÖrnek:\n{title: Harika Lütuf}\n{key: G}\n[G]Harika [C]lütuf ne [G]tatlı bir [D]ses"
+  },
+  "common": {
+    "close": "Kapat"
+  },
+  "nav": {
+    "library": "Kütüphane",
+    "settings": "Ayarlar"
+  },
+  "library": {
+    "title": "Şarkı Kütüphanesi",
+    "searchPlaceholder": "Şarkı, sanatçı veya ton ara",
+    "allSongs": "Tüm Şarkılar",
+    "favorites": "Favoriler",
+    "songsCount": "{{count}} şarkı",
+    "noSongs": "Şarkı bulunamadı",
+    "emptyFavorites": "Favorilere eklemek için bir şarkıda ♡ simgesine dokunun",
+    "emptyDefault": "Farklı bir arama veya filtre deneyin"
+  },
+  "editor": {
+    "back": "← Geri",
+    "save": "Kaydet",
+    "edit": "Düzenle",
+    "chord": "♪ Akor",
+    "chordActive": "♪ Aktif",
+    "songTitle": "Şarkı Başlığı",
+    "artist": "Sanatçı",
+    "addTag": "Etiket ekle...",
+    "editorPlaceholder": "ChordPro sözlerini yazmaya başlayın...\nÖrnek: [C]Merhaba [G]Dünya"
+  }
+}

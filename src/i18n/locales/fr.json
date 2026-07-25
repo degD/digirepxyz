@@ -1,0 +1,62 @@
+{
+  "settings": {
+    "title": "Paramètres",
+    "appearance": "APPARENCE",
+    "editor": "ÉDITEUR",
+    "data": "DONNÉES",
+    "help": "AIDE",
+    "about": "À PROPOS",
+    "darkMode": "Mode sombre",
+    "chordColor": "Couleur des accords",
+    "autoSave": "Enregistrement automatique",
+    "chordDiagrams": "Diagrammes d'accords",
+    "exportLibrary": "Exporter la bibliothèque",
+    "importSongs": "Importer des chansons",
+    "importSingleSong": "Importer une seule chanson",
+    "howToUseLabel": "Comment utiliser l'application",
+    "howToUseTitle": "Comment utiliser Repertoire",
+    "chordProSyntax": "Syntaxe ChordPro",
+    "version": "Version",
+    "licenses": "Licences",
+    "githubRepo": "Dépôt GitHub",
+    "language": "Langue",
+    "repertoireVersionShort": "Application Repertoire v1.0.0",
+    "madeWith": "Fait avec ♫",
+    "exportComplete": "Exportation terminée",
+    "exportFailed": "Échec de l'exportation",
+    "importComplete": "Importation terminée",
+    "importFailed": "Échec de l'importation"
+  },
+  "help": {
+    "app": "1) Bibliothèque : parcourir, rechercher, filtrer et marquer des chansons comme favorites.\n2) Bouton + : créer une nouvelle chanson.\n3) Mode édition : tapez du texte ChordPro brut et appuyez sur Enregistrer.\n4) Mode lecture : utilisez la transposition et les contrôles de taille de police par chanson.\n5) Paramètres : personnalisez la couleur des accords, l'enregistrement automatique et les diagrammes.",
+    "chordpro": "Syntaxe rapide ChordPro :\n- Accords en ligne : [C]Grâce [G]incroyable\n- Directive titre : {title: Ma Chanson}\n- Directive tonalité : {key: G}\n- Directive artiste : {artist: Mon Groupe}\n- Directive tags : {tags: adoration, acoustique}\n\nExemple :\n{title: Grâce Incroyable}\n{key: G}\n[G]Grâce [C]incroyable, quel [G]doux [D]son"
+  },
+  "common": {
+    "close": "Fermer"
+  },
+  "nav": {
+    "library": "Bibliothèque",
+    "settings": "Paramètres"
+  },
+  "library": {
+    "title": "Bibliothèque de chansons",
+    "searchPlaceholder": "Rechercher des chansons, artistes ou tonalités",
+    "allSongs": "Toutes les chansons",
+    "favorites": "Favoris",
+    "songsCount": "{{count}} chansons",
+    "noSongs": "Aucune chanson trouvée",
+    "emptyFavorites": "Appuyez sur ♡ sur une chanson pour ajouter aux favoris",
+    "emptyDefault": "Essayez une autre recherche ou un autre filtre"
+  },
+  "editor": {
+    "back": "← Retour",
+    "save": "Enregistrer",
+    "edit": "Modifier",
+    "chord": "♪ Accord",
+    "chordActive": "♪ Actif",
+    "songTitle": "Titre de la chanson",
+    "artist": "Artiste",
+    "addTag": "Ajouter un tag...",
+    "editorPlaceholder": "Commencez à taper les paroles ChordPro...\nExemple : [C]Bonjour [G]Monde"
+  }
+}

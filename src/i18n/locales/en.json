@@ -1,0 +1,62 @@
+{
+  "settings": {
+    "title": "Settings",
+    "appearance": "APPEARANCE",
+    "editor": "EDITOR",
+    "data": "DATA",
+    "help": "HELP",
+    "about": "ABOUT",
+    "darkMode": "Dark Mode",
+    "chordColor": "Chord Color",
+    "autoSave": "Auto Save",
+    "chordDiagrams": "Chord Diagrams",
+    "exportLibrary": "Export Library",
+    "importSongs": "Import Songs",
+    "importSingleSong": "Import Single Song",
+    "howToUseLabel": "How to Use the App",
+    "howToUseTitle": "How to Use Repertoire",
+    "chordProSyntax": "ChordPro Syntax",
+    "version": "Version",
+    "licenses": "Licenses",
+    "githubRepo": "GitHub Repo",
+    "language": "Language",
+    "repertoireVersionShort": "Repertoire App v1.0.0",
+    "madeWith": "Made with ♫",
+    "exportComplete": "Export Complete",
+    "exportFailed": "Export Failed",
+    "importComplete": "Import Complete",
+    "importFailed": "Import Failed"
+  },
+  "help": {
+    "app": "1) Library: browse, search, filter, and favorite songs.\n2) + button: create a new song.\n3) Edit mode: type raw ChordPro text and tap Save.\n4) View mode: use transpose and per-song font-size controls.\n5) Settings: customize chord color, autosave, and diagrams.",
+    "chordpro": "ChordPro quick syntax:\n- Chords inline: [C]Amazing [G]grace\n- Title directive: {title: My Song}\n- Key directive: {key: G}\n- Artist directive: {artist: My Band}\n- Tags directive: {tags: worship, acoustic}\n\nExample:\n{title: Amazing Grace}\n{key: G}\n[G]Amazing [C]grace how [G]sweet the [D]sound"
+  },
+  "common": {
+    "close": "Close"
+  },
+  "nav": {
+    "library": "Library",
+    "settings": "Settings"
+  },
+  "library": {
+    "title": "Song Library",
+    "searchPlaceholder": "Search songs, artists, or keys",
+    "allSongs": "All Songs",
+    "favorites": "Favorites",
+    "songsCount": "{{count}} songs",
+    "noSongs": "No songs found",
+    "emptyFavorites": "Tap ♡ on a song to add favorites",
+    "emptyDefault": "Try a different search or filter"
+  },
+  "editor": {
+    "back": "← Back",
+    "save": "Save",
+    "edit": "Edit",
+    "chord": "♪ Chord",
+    "chordActive": "♪ Active",
+    "songTitle": "Song Title",
+    "artist": "Artist",
+    "addTag": "Add tag...",
+    "editorPlaceholder": "Start typing ChordPro lyrics...\nExample: [C]Hello [G]World"
+  }
+}

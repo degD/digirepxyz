@@ -1,0 +1,62 @@
+{
+  "settings": {
+    "title": "Einstellungen",
+    "appearance": "DARSTELLUNG",
+    "editor": "EDITOR",
+    "data": "DATEN",
+    "help": "HILFE",
+    "about": "ÜBER",
+    "darkMode": "Dunkler Modus",
+    "chordColor": "Akkordfarbe",
+    "autoSave": "Automatisches Speichern",
+    "chordDiagrams": "Akkorddiagramme",
+    "exportLibrary": "Bibliothek exportieren",
+    "importSongs": "Songs importieren",
+    "importSingleSong": "Einzelnen Song importieren",
+    "howToUseLabel": "Wie man die App benutzt",
+    "howToUseTitle": "Wie man Repertoire benutzt",
+    "chordProSyntax": "ChordPro-Syntax",
+    "version": "Version",
+    "licenses": "Lizenzen",
+    "githubRepo": "GitHub-Repo",
+    "language": "Sprache",
+    "repertoireVersionShort": "Repertoire-App v1.0.0",
+    "madeWith": "Gemacht mit ♫",
+    "exportComplete": "Export abgeschlossen",
+    "exportFailed": "Export fehlgeschlagen",
+    "importComplete": "Import abgeschlossen",
+    "importFailed": "Import fehlgeschlagen"
+  },
+  "help": {
+    "app": "1) Bibliothek: durchsuchen, suchen, filtern und Songs als Favoriten markieren.\n2) + Button: einen neuen Song erstellen.\n3) Bearbeitungsmodus: Rohes ChordPro-Text eingeben und Speichern drücken.\n4) Ansichtsmodus: Transposition und pro-Song Schriftgrößensteuerung verwenden.\n5) Einstellungen: Akkordfarbe, automatische Speicherung und Diagramme anpassen.",
+    "chordpro": "ChordPro Kurzsyntax:\n- Akkorde inline: [C]Erstaunliche [G]Gnade\n- Titel-Direktive: {title: Mein Lied}\n- Tonart-Direktive: {key: G}\n- Künstler-Direktive: {artist: Meine Band}\n- Tags-Direktive: {tags: anbetung, akustisch}\n\nBeispiel:\n{title: Erstaunliche Gnade}\n{key: G}\n[G]Erstaunliche [C]Gnade, wie [G]süß der [D]Klang"
+  },
+  "common": {
+    "close": "Schließen"
+  },
+  "nav": {
+    "library": "Bibliothek",
+    "settings": "Einstellungen"
+  },
+  "library": {
+    "title": "Songbibliothek",
+    "searchPlaceholder": "Songs, Künstler oder Tonarten suchen",
+    "allSongs": "Alle Lieder",
+    "favorites": "Favoriten",
+    "songsCount": "{{count}} Lieder",
+    "noSongs": "Keine Lieder gefunden",
+    "emptyFavorites": "Tippe ♡ bei einem Lied, um es zu deinen Favoriten hinzuzufügen",
+    "emptyDefault": "Versuche eine andere Suche oder einen anderen Filter"
+  },
+  "editor": {
+    "back": "← Zurück",
+    "save": "Speichern",
+    "edit": "Bearbeiten",
+    "chord": "♪ Akkord",
+    "chordActive": "♪ Aktiv",
+    "songTitle": "Liedtitel",
+    "artist": "Interpret",
+    "addTag": "Tag hinzufügen...",
+    "editorPlaceholder": "Beginne ChordPro-Text zu schreiben...\nBeispiel: [C]Hallo [G]Welt"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "settings": {
+    "title": "Ajustes",
+    "appearance": "ASPECTO",
+    "editor": "EDITOR",
+    "data": "DATOS",
+    "help": "AYUDA",
+    "about": "ACERCA DE",
+    "darkMode": "Modo oscuro",
+    "chordColor": "Color de acordes",
+    "autoSave": "Guardado automático",
+    "chordDiagrams": "Diagramas de acordes",
+    "exportLibrary": "Exportar biblioteca",
+    "importSongs": "Importar canciones",
+    "importSingleSong": "Importar una sola canción",
+    "howToUseLabel": "Cómo usar la aplicación",
+    "howToUseTitle": "Cómo usar Repertoire",
+    "chordProSyntax": "Sintaxis ChordPro",
+    "version": "Versión",
+    "licenses": "Licencias",
+    "githubRepo": "Repositorio GitHub",
+    "language": "Idioma",
+    "repertoireVersionShort": "Aplicación Repertoire v1.0.0",
+    "madeWith": "Hecho con ♫",
+    "exportComplete": "Exportación completada",
+    "exportFailed": "Exportación fallida",
+    "importComplete": "Importación completada",
+    "importFailed": "Importación fallida"
+  },
+  "help": {
+    "app": "1) Biblioteca: busca, filtra y marca canciones como favoritas.\n2) Botón +: crea una nueva canción.\n3) Modo de edición: escribe texto ChordPro y toca Guardar.\n4) Modo de vista: usa transposición y controles de tamaño de fuente por canción.\n5) Ajustes: personaliza color de acordes, guardado automático y diagramas.",
+    "chordpro": "Sintaxis rápida de ChordPro:\n- Acordes en línea: [C]Asombrosa [G]gracia\n- Directiva de título: {title: Mi Canción}\n- Directiva de tonalidad: {key: G}\n- Directiva de artista: {artist: Mi Banda}\n- Directiva de etiquetas: {tags: adoración, acústico}\n\nEjemplo:\n{title: Asombrosa Gracia}\n{key: G}\n[G]Asombrosa [C]gracia, qué [G]dulce el [D]sonido"
+  },
+  "common": {
+    "close": "Cerrar"
+  },
+  "nav": {
+    "library": "Biblioteca",
+    "settings": "Ajustes"
+  },
+  "library": {
+    "title": "Biblioteca de canciones",
+    "searchPlaceholder": "Buscar canciones, artistas o tonalidades",
+    "allSongs": "Todas las canciones",
+    "favorites": "Favoritas",
+    "songsCount": "{{count}} canciones",
+    "noSongs": "No se encontraron canciones",
+    "emptyFavorites": "Toca ♡ en una canción para agregar a favoritos",
+    "emptyDefault": "Prueba otra búsqueda o filtro"
+  },
+  "editor": {
+    "back": "← Atrás",
+    "save": "Guardar",
+    "edit": "Editar",
+    "chord": "♪ Acorde",
+    "chordActive": "♪ Activo",
+    "songTitle": "Título de la canción",
+    "artist": "Artista",
+    "addTag": "Agregar etiqueta...",
+    "editorPlaceholder": "Comienza a escribir letras en ChordPro...\nEjemplo: [C]Hola [G]Mundo"
+  }
+}
