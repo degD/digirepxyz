@@ -26,7 +26,7 @@ These rules are **non-negotiable** and apply to every task, every time. Violatio
    Explain why, how and when did you implement every function, type, class, etc.
 
 5. **Do not run excessive commands.**
-   For example, do not run linting after implementation, git status to check changes, find commands to find files. This is very important. When you get stuck, ASK FOR HELP!
+   For example, do not run linting after implementation, git status to check changes, find commands to find files. This is very important. When you get stuck, ASK FOR HELP! Especially important for project package management. Never install packages (using `bun add`, for example) without me confirming. Ask me explicitly first.
 
 ---
 
