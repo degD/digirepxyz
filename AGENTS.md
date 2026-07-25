@@ -30,7 +30,7 @@ These rules are **non-negotiable** and apply to every task, every time. Violatio
 - Explain why, how and when did you implement every function, type, class, etc.
 
 5. **Do not run excessive commands.**
-- For example, do not run linting after implementation, git status to check changes, find commands to find files. This is very important. 
+- For example, do run linting (`npm run lint`) after implementation, git status to check changes, find commands to find files. This is very important. 
 - When you get stuck, ASK FOR HELP! Especially important for project package management. 
 - Ask me explicitly first, when you think you need to install a package. 
 - Never attempt silent workarounds (e.g. refactoring code, rewriting tests, or changing behavior) when a package or dependency is missing. 
@@ -122,3 +122,5 @@ src/
    - Port `ChordDiagram`, `ChordPicker`, `ChordSheet`, `SongItem`, `SearchBar`, `FilterTabs`.
 6. **Phase 6: Routes & Screens** (`src/app/`)
    - Implement Expo Router pages (`index.tsx`, `editor.tsx`, `settings.tsx`, `viewer.tsx`).
+7. **Phase 7: Bug Fixing** (`src/app/`)
+   - Fix bugs found by inspection and system testing.

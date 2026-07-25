@@ -59,9 +59,9 @@ export function exportLibrary(
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { File, Paths } = require('expo-file-system');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const Sharing = require('expo-sharing');
 
     (async () => {
@@ -98,43 +98,65 @@ export function exportLibrary(
  * Parses raw imported ChordPro file content into an array of structured `Song` objects.
  * Splits song blocks separated by `---` and extracts title, artist, key, and tags directives.
  *
- * @param text - Raw string text of the imported ChordPro file.
+ * @param content - Raw text content from imported file.
  * @returns Array of parsed `Song` objects.
  */
-export function parseImportedContent(text: string): Song[] {
-  const songBlocks = text.split(/\n---\n/).filter((block) => block.trim());
+export function parseImportedContent(content: string): Song[] {
+  if (!content || !content.trim()) return [];
+
+  const rawBlocks = content.split(/\n---\n|\n===\n/);
   const songs: Song[] = [];
 
-  for (const block of songBlocks) {
-    const lines = block.trim().split('\n');
-    let title = 'Untitled';
+  for (let i = 0; i < rawBlocks.length; i++) {
+    const block = rawBlocks[i].trim();
+    if (!block) continue;
+
+    let title = '';
     let artist = '';
-    let key = '';
+    let originalKey = '';
     let tags: string[] = [];
-    const contentLines: string[] = [];
 
-    for (const line of lines) {
-      const titleMatch = line.match(/\{title:\s*(.+)\}/i);
-      const artistMatch = line.match(/\{artist:\s*(.+)\}/i);
-      const keyMatch = line.match(/\{key:\s*(.+)\}/i);
-      const tagsMatch = line.match(/\{tags:\s*(.+)\}/i);
+    const titleMatch = block.match(/\{title:\s*([^}]+)\}/i) || block.match(/\{t:\s*([^}]+)\}/i);
+    if (titleMatch) title = titleMatch[1].trim();
 
-      if (titleMatch) title = titleMatch[1].trim();
-      else if (artistMatch) artist = artistMatch[1].trim();
-      else if (keyMatch) key = keyMatch[1].trim();
-      else if (tagsMatch) tags = tagsMatch[1].split(',').map((t) => t.trim().toLowerCase());
-      else contentLines.push(line);
+    const artistMatch = block.match(/\{artist:\s*([^}]+)\}/i) || block.match(/\{a:\s*([^}]+)\}/i);
+    if (artistMatch) artist = artistMatch[1].trim();
+
+    const keyMatch = block.match(/\{key:\s*([^}]+)\}/i) || block.match(/\{k:\s*([^}]+)\}/i);
+    if (keyMatch) originalKey = keyMatch[1].trim();
+
+    const tagsMatch = block.match(/\{tags:\s*([^}]+)\}/i);
+    if (tagsMatch) {
+      tags = tagsMatch[1]
+        .split(',')
+        .map((t) => t.trim().toLowerCase())
+        .filter(Boolean);
     }
 
+    if (!title) {
+      const firstLine = block.split('\n')[0].replace(/[{}[\]]/g, '').trim();
+      title = firstLine ? firstLine.slice(0, 30) : `Imported Song ${i + 1}`;
+    }
+
+    const cleanContent = block
+      .replace(/\{title:\s*[^}]+\}\n?/gi, '')
+      .replace(/\{t:\s*[^}]+\}\n?/gi, '')
+      .replace(/\{artist:\s*[^}]+\}\n?/gi, '')
+      .replace(/\{a:\s*[^}]+\}\n?/gi, '')
+      .replace(/\{key:\s*[^}]+\}\n?/gi, '')
+      .replace(/\{k:\s*[^}]+\}\n?/gi, '')
+      .replace(/\{tags:\s*[^}]+\}\n?/gi, '')
+      .trim();
+
     songs.push({
-      id: String(Date.now()) + Math.random().toString(36).slice(2, 6),
+      id: `${Date.now()}_${i}_${Math.random().toString(36).slice(2, 7)}`,
       title,
       artist: artist || undefined,
-      originalKey: key || undefined,
-      content: contentLines.join('\n').trim(),
-      isFavorite: false,
-      tags,
+      originalKey: originalKey || undefined,
+      tags: tags.length > 0 ? tags : undefined,
+      content: cleanContent || block,
       fontScale: 1,
+      isFavorite: false,
     });
   }
 
@@ -142,9 +164,9 @@ export function parseImportedContent(text: string): Song[] {
 }
 
 /**
- * Triggers a file picker to import songs into the library (web file input / native document picker).
+ * Triggers a native document picker or web file dialog to select and import ChordPro song files.
  *
- * @param onImport - Callback function invoked with parsed `Song[]` array upon successful file selection.
+ * @param onImport - Callback invoked with the parsed array of imported `Song` objects.
  * @param onStatus - Optional callback for reporting status updates or error messages.
  */
 export function triggerFileImport(
@@ -163,7 +185,12 @@ export function triggerFileImport(
         reader.onload = (ev) => {
           const text = ev.target?.result as string;
           const songs = parseImportedContent(text);
-          onImport(songs);
+          if (songs.length > 0) {
+            onImport(songs);
+            if (onStatus) onStatus({ type: 'success', message: `Imported ${songs.length} song(s)` });
+          } else {
+            if (onStatus) onStatus({ type: 'error', message: 'No valid songs found in file.' });
+          }
         };
         reader.readAsText(file);
       }
@@ -173,9 +200,9 @@ export function triggerFileImport(
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const DocumentPicker = require('expo-document-picker');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { File } = require('expo-file-system');
 
     (async () => {
@@ -219,7 +246,7 @@ export function triggerFileImport(
         if (onStatus) onStatus({ type: 'error', message: `Error importing file: ${err.message}` });
       }
     })();
-  } catch (err) {
+  } catch {
     if (onStatus) onStatus({ type: 'error', message: 'Native import requires expo-document-picker and expo-file-system' });
   }
 }
@@ -253,7 +280,7 @@ export function shareSong(
         (navigator as any).share({ title: song.title, text: content }).catch(() => {});
         return { success: true, message: 'Shared via navigator.share' };
       }
-    } catch (e) {}
+    } catch {}
 
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -268,9 +295,9 @@ export function shareSong(
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { File, Paths } = require('expo-file-system');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const Sharing = require('expo-sharing');
 
     (async () => {
@@ -292,7 +319,7 @@ export function shareSong(
     })();
 
     return { success: true, message: 'Preparing native share...' };
-  } catch (err) {
+  } catch {
     if (onStatus) onStatus({ type: 'error', message: 'Native share requires expo-file-system and expo-sharing' });
   }
   return { success: false, message: 'Share failed' };
@@ -331,9 +358,9 @@ export function importSingleSong(
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const DocumentPicker = require('expo-document-picker');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { File } = require('expo-file-system');
 
     (async () => {
@@ -359,7 +386,7 @@ export function importSingleSong(
         if (onStatus) onStatus({ type: 'error', message: `Error importing file: ${err.message}` });
       }
     })();
-  } catch (err) {
+  } catch {
     if (onStatus) onStatus({ type: 'error', message: 'Native import requires expo-document-picker and expo-file-system' });
   }
 }

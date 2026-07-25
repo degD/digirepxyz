@@ -1,4 +1,4 @@
-import i18n from '../index';
+import { i18n } from '../index';
 
 describe('i18n module', () => {
   beforeEach(() => {

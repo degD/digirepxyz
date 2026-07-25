@@ -72,9 +72,9 @@ describe('dataUtils - parseImportedContent', () => {
 
 describe('dataUtils - triggerFileImport', () => {
   it('calls onImport when document picker returns a valid file', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const DocumentPicker = require('expo-document-picker');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { File } = require('expo-file-system');
 
     DocumentPicker.getDocumentAsync.mockResolvedValue({
@@ -103,7 +103,7 @@ describe('dataUtils - triggerFileImport', () => {
   });
 
   it('calls onStatus with error when picker is cancelled', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const DocumentPicker = require('expo-document-picker');
 
     DocumentPicker.getDocumentAsync.mockResolvedValue({ canceled: true });

@@ -5,6 +5,21 @@ import { getSongFontScale } from './fontScale';
 export const SONGS_STORAGE_KEY = 'repertoire_songs';
 
 /**
+ * Safely resolves the AsyncStorage module across native and test environments.
+ */
+function getAsyncStorage() {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require('@react-native-async-storage/async-storage');
+    const storage = mod?.default || mod;
+    if (storage && typeof storage.setItem === 'function' && typeof storage.getItem === 'function') {
+      return storage;
+    }
+  } catch {}
+  return null;
+}
+
+/**
  * Normalizes an unparsed or raw array of song records, ensuring every song has a valid `fontScale`.
  */
 function normalizeSongs(value: unknown, fallbackSongs: Song[]): Song[] {
@@ -50,8 +65,8 @@ export function getInitialSongs(fallbackSongs: Song[] = []): Song[] {
 export async function loadSongs(fallbackSongs: Song[] = []): Promise<Song[]> {
   if (Platform.OS === 'web') return readWebSongs(fallbackSongs);
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+    const AsyncStorage = getAsyncStorage();
+    if (!AsyncStorage) return fallbackSongs;
     const raw = await AsyncStorage.getItem(SONGS_STORAGE_KEY);
     if (!raw) return fallbackSongs;
     return normalizeSongs(JSON.parse(raw), fallbackSongs);
@@ -73,9 +88,10 @@ export async function persistSongs(songs: Song[]): Promise<void> {
       if (typeof localStorage !== 'undefined') localStorage.setItem(SONGS_STORAGE_KEY, json);
       return;
     }
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-    await AsyncStorage.setItem(SONGS_STORAGE_KEY, json);
+    const AsyncStorage = getAsyncStorage();
+    if (AsyncStorage) {
+      await AsyncStorage.setItem(SONGS_STORAGE_KEY, json);
+    }
   } catch (error) {
     console.warn('Unable to persist songs', error);
   }

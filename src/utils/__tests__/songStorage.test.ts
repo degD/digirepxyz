@@ -12,7 +12,7 @@ function loadSongStorageForPlatform(os: 'android' | 'ios' | 'web', asyncStorageM
     }));
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   return require('../songStorage');
 }
 

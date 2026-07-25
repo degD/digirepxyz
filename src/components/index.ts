@@ -1,3 +1,6 @@
+export { default as BottomNav } from './BottomNav';
+export type { BottomNavProps } from './BottomNav';
+
 export { default as ChordDiagram, getChordVoicings, getChordVoicing } from './ChordDiagram';
 export type { ChordDiagramProps } from './ChordDiagram';
 

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Platform } from 'react-native';
-import i18n from '@/i18n';
+import { i18n } from '@/i18n';
 import { Settings, Theme, FontSizeCategory, FontSizeConfig, ChordColorName } from '@/types/settings';
 
 export const THEME_BASE = {
@@ -63,6 +63,7 @@ export const storage = {
         const raw = typeof localStorage !== 'undefined' && localStorage.getItem(STORAGE_KEY);
         return raw ? JSON.parse(raw) : null;
       }
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const AsyncStorage = require('@react-native-async-storage/async-storage').default;
       const raw = await AsyncStorage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : null;
@@ -79,6 +80,7 @@ export const storage = {
         }
         return;
       }
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const AsyncStorage = require('@react-native-async-storage/async-storage').default;
       await AsyncStorage.setItem(STORAGE_KEY, json);
     } catch {}
@@ -121,13 +123,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const lang = settings.language;
   useEffect(() => {
-    if (settings && settings.language) {
+    if (lang) {
       try {
-        i18n.changeLanguage(settings.language);
+        i18n.changeLanguage(lang);
       } catch {}
     }
-  }, [settings.language]);
+  }, [lang]);
 
   const updateSetting = useCallback(<K extends keyof Settings>(key: K, value: Settings[K]) => {
     setSettings((prev) => {
