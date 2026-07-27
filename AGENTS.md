@@ -2,12 +2,24 @@
 # AGENTS.md - digirepxyz
 
 This file is the operating guide for coding agents working in this repository (`digirepxyz`).
-It captures the project conventions, architecture, and step-by-step porting strategy from `digirepx2`.
+This project is a fork of `digirepx2`.
 This project is created/managed using `bun`.
+Working branch is `roadmap` and the goal is to implement new features.
 
-## Who Are You?
+## Digirepxyz
 
-You are my junior coding pair AI, and while you don't know a lot about project design and related ideas, you are very good at coding and refactoring. You ask me for confirmation for any design or project related question you have. Even if I don't know the solution, we can brainstorm. You speak very consicesly, with a caveman like language. You always think thoroghly. 
+A digital repertoire and chord management app for musicians. Manage the song library with tagging, 
+favorites, ChordPro editing and viewing, transposition, guitar chord diagrams, and import/export. 
+Built with Expo (React Native). 
+
+## Current Features
+- Song library with full-text search, tag filters, and favorites
+- Raw ChordPro editor with undo/redo, auto-save, and assisted chord picker
+- Song viewer with real-time transposition, per-song font scaling, and split-pane mode
+- Offline guitar chord diagrams with multiple voicings per chord (source)
+- Import and export songs as .cho files (full library)
+- Share songs
+- Accent chord color picker and dark mode
 
 ## STRICT RULES
 
@@ -107,20 +119,19 @@ src/
 
 ---
 
-## Porting Roadmap (Hand-by-Hand Plan)
+## Roadmap
 
-1. **Phase 1: Core Definitions & Types** (`src/types/`)
-   - Define interfaces for Songs, Chords, Settings, Transposition, and DB entities.
-2. **Phase 2: Core Utilities & Logic** (`src/utils/`)
-   - Port `transposer.js`, `chordProParser.js`, `fontScale.js`, `songStorage.js`, `dataUtils.js` to TypeScript.
-   - Write/run unit tests to verify 100% parity.
-3. **Phase 3: Context & Localization** (`src/context/`, `src/i18n/`)
-   - Port `SettingsContext` and i18n translations.
-4. **Phase 4: Database Layer** (`src/db/`)
-   - Port schema and models for database persistence.
-5. **Phase 5: Reusable UI Components** (`src/components/`)
-   - Port `ChordDiagram`, `ChordPicker`, `ChordSheet`, `SongItem`, `SearchBar`, `FilterTabs`.
-6. **Phase 6: Routes & Screens** (`src/app/`)
-   - Implement Expo Router pages (`index.tsx`, `editor.tsx`, `settings.tsx`, `viewer.tsx`).
-7. **Phase 7: Bug Fixing** (`src/app/`)
-   - Fix bugs found by inspection and system testing.
+Each item below represents a feature to be implemented.
+Implemented fetures will be shown with a (+) symbol at the beginning.
+For example, `n. (+) Feature XYZ` is a "completed" feature.
+The feature to work on will be given by user.
+
+1. Single song easy import & export.
+2. "Open with" on mobile by filetype to import.
+3. Importing from PDF, single and bulk.
+4. Importing from Word, single and bulk.
+5. Exporting to PDF and Word.
+6. Cloud sync.
+7. Searching the web for songs.
+8. Easy "share song" button.
+9. System tests.
