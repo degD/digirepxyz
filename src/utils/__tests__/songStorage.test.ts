@@ -60,6 +60,26 @@ describe('songStorage', () => {
     expect(asyncStorageMock.setItem).toHaveBeenCalledWith('repertoire_songs', JSON.stringify(songs));
   });
 
+  it('preserves an intentionally empty stored library', async () => {
+    const asyncStorageMock = {
+      getItem: jest.fn().mockResolvedValue(JSON.stringify([])),
+      setItem: jest.fn(),
+    };
+    const { loadSongsResult } = loadSongStorageForPlatform('android', asyncStorageMock);
+
+    await expect(loadSongsResult(fallbackSongs)).resolves.toEqual({ status: 'loaded', songs: [] });
+  });
+
+  it('does not treat malformed storage as a missing library', async () => {
+    const asyncStorageMock = {
+      getItem: jest.fn().mockResolvedValue(JSON.stringify([{ id: 'bad', title: 1, content: 'text' }])),
+      setItem: jest.fn(),
+    };
+    const { loadSongsResult } = loadSongStorageForPlatform('android', asyncStorageMock);
+
+    await expect(loadSongsResult(fallbackSongs)).resolves.toEqual({ status: 'error', songs: fallbackSongs });
+  });
+
   it('reads initial songs from localStorage on web', () => {
     const localStorageMock = {
       getItem: jest.fn().mockReturnValue(

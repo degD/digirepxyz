@@ -25,7 +25,8 @@
     "exportComplete": "Exportação concluída",
     "exportFailed": "Falha na exportação",
     "importComplete": "Importação concluída",
-    "importFailed": "Falha na importação"
+    "importFailed": "Falha na importação",
+    "importedSuccess": "{{count}} música(s) importada(s)"
   },
   "help": {
     "app": "1) Biblioteca: navegar, pesquisar, filtrar e favoritar músicas.\n2) Botão +: criar uma nova música.\n3) Modo de edição: digite texto ChordPro bruto e toque em Salvar.\n4) Modo de visualização: use transposição e controles de tamanho de fonte por música.\n5) Configurações: personalize a cor dos acordes, salvamento automático e diagramas.",
@@ -45,6 +46,7 @@
     "favorites": "Favoritas",
     "songsCount": "{{count}} músicas",
     "noSongs": "Nenhuma música encontrada",
+    "songNotFound": "Música não encontrada",
     "emptyFavorites": "Toque ♡ em uma música para adicionar aos favoritos",
     "emptyDefault": "Tente uma pesquisa ou filtro diferente"
   },
@@ -58,5 +60,13 @@
     "artist": "Artista",
     "addTag": "Adicionar tag...",
     "editorPlaceholder": "Comece a digitar as letras em ChordPro...\nExemplo: [C]Olá [G]Mundo"
+  },
+  "colors": {
+    "Blue": "Azul",
+    "Green": "Verde",
+    "Purple": "Roxo",
+    "Red": "Vermelho",
+    "Orange": "Laranja",
+    "Pink": "Rosa"
   }
 }

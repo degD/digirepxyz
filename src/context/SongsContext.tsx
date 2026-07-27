@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { Platform } from 'react-native';
 import { Song } from '@/types/song';
 import { INITIAL_SONGS } from '@/constants/initialSongs';
-import { getInitialSongs, loadSongs, persistSongs } from '@/utils/songStorage';
+import { getInitialSongs, loadSongsResult, persistSongs, SongLoadStatus } from '@/utils/songStorage';
 import { upsertSong } from '@/utils/songState';
 import { getSongFontScale } from '@/utils/fontScale';
 
 export interface SongsContextValue {
   songs: Song[];
+  hasHydrated: boolean;
   allTags: string[];
   saveSong: (songData: Partial<Song> & { id?: string }) => void;
   deleteSong: (id: string) => void;
@@ -20,14 +20,21 @@ export const SongsContext = createContext<SongsContextValue | undefined>(undefin
 
 export function SongsProvider({ children }: { children: React.ReactNode }) {
   const [songs, setSongs] = useState<Song[]>(() => getInitialSongs(INITIAL_SONGS));
-  const [hasHydrated, setHasHydrated] = useState<boolean>(Platform.OS === 'web');
+  const [hasHydrated, setHasHydrated] = useState<boolean>(false);
+  const [loadStatus, setLoadStatus] = useState<SongLoadStatus>('missing');
+
+  const markStorageRecovery = useCallback(() => {
+    setLoadStatus((status) => status === 'error' ? 'missing' : status);
+  }, []);
 
   useEffect(() => {
-    if (Platform.OS === 'web') return;
     let isMounted = true;
-    loadSongs(INITIAL_SONGS)
-      .then((loaded) => {
-        if (isMounted && loaded && loaded.length > 0) setSongs(loaded);
+    loadSongsResult(INITIAL_SONGS)
+      .then((result) => {
+        if (isMounted) {
+          if (result.status === 'loaded') setSongs(result.songs);
+          setLoadStatus(result.status);
+        }
       })
       .finally(() => {
         if (isMounted) setHasHydrated(true);
@@ -38,9 +45,9 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!hasHydrated) return;
+    if (!hasHydrated || loadStatus === 'error') return;
     persistSongs(songs);
-  }, [songs, hasHydrated]);
+  }, [songs, hasHydrated, loadStatus]);
 
   const allTags = useMemo(() => {
     const set = new Set<string>();
@@ -51,21 +58,24 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
   }, [songs]);
 
   const saveSong = useCallback((songData: Partial<Song> & { id?: string }) => {
+    markStorageRecovery();
     setSongs((prev) => {
       const selected = songData.id ? prev.find((s) => s.id === songData.id) || songData : songData;
       return upsertSong(prev, selected, songData);
     });
-  }, []);
+  }, [markStorageRecovery]);
 
   const deleteSong = useCallback((id: string) => {
+    markStorageRecovery();
     setSongs((prev) => prev.filter((s) => s.id !== id));
-  }, []);
+  }, [markStorageRecovery]);
 
   const toggleFavorite = useCallback((id: string) => {
+    markStorageRecovery();
     setSongs((prev) =>
       prev.map((s) => (s.id === id ? { ...s, isFavorite: !s.isFavorite } : s))
     );
-  }, []);
+  }, [markStorageRecovery]);
 
   const importSongs = useCallback((imported: Song[]) => {
     const normalized = (imported || []).map((song) => ({
@@ -73,8 +83,17 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
       fontScale: getSongFontScale(song),
     }));
     if (normalized.length === 0) return;
-    setSongs((prev) => [...normalized, ...prev]);
-  }, []);
+    markStorageRecovery();
+    setSongs((prev) => {
+      const existingIds = new Set(prev.map((song) => song.id));
+      const uniqueImported = normalized.filter((song) => {
+        if (!song.id || existingIds.has(song.id)) return false;
+        existingIds.add(song.id);
+        return true;
+      });
+      return [...uniqueImported, ...prev];
+    });
+  }, [markStorageRecovery]);
 
   const getSongById = useCallback(
     (id: string) => songs.find((s) => s.id === id),
@@ -84,6 +103,7 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<SongsContextValue>(
     () => ({
       songs,
+      hasHydrated,
       allTags,
       saveSong,
       deleteSong,
@@ -91,7 +111,7 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
       importSongs,
       getSongById,
     }),
-    [songs, allTags, saveSong, deleteSong, toggleFavorite, importSongs, getSongById]
+    [songs, hasHydrated, allTags, saveSong, deleteSong, toggleFavorite, importSongs, getSongById]
   );
 
   return <SongsContext.Provider value={value}>{children}</SongsContext.Provider>;

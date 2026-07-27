@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { SettingsProvider } from '@/context/SettingsContext';
-import EditorScreenRoute from '../editor';
+import EditorScreenRoute from '@/app/editor';
 
 const mockSaveSong = jest.fn();
 const mockGetSongById = jest.fn();
@@ -15,6 +15,7 @@ jest.mock('expo-router', () => ({
     canGoBack: jest.fn(() => true),
     back: mockRouterBack,
   }),
+  useNavigation: () => ({ addListener: jest.fn(() => jest.fn()), dispatch: jest.fn() }),
   useLocalSearchParams: () => ({ id: 'test-song-1' }),
 }));
 
@@ -87,5 +88,13 @@ describe('EditorScreen', () => {
       tags: ['rock'],
       fontScale: 1.1,
     });
+  });
+
+  it('does not turn an unknown edit ID into a new draft', async () => {
+    mockGetSongById.mockReturnValue(undefined);
+    const { getByText } = await renderEditor();
+
+    expect(getByText('Song not found')).toBeTruthy();
+    expect(mockSaveSong).not.toHaveBeenCalled();
   });
 });

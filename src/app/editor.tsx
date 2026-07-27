@@ -1,10 +1,10 @@
 import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
-  View, Text, TouchableOpacity, TextInput, StyleSheet,
+  BackHandler, View, Text, TouchableOpacity, TextInput, StyleSheet,
   KeyboardAvoidingView, Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useTranslation } from '@/i18n';
 import ChordPicker from '@/components/ChordPicker';
 import { useSettings, FONT_SIZES } from '@/context/SettingsContext';
@@ -52,19 +52,27 @@ function useUndoRedo(initialValue: string) {
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
 
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
   return { currentValue, pushState, pushImmediate, undo, redo, canUndo, canRedo };
 }
 
 export default function EditorScreenRoute() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id: rawId } = useLocalSearchParams<{ id?: string | string[] }>();
+  const id = typeof rawId === 'string' && rawId.trim() !== '' ? rawId : undefined;
   const { theme, settings } = useSettings();
   const { getSongById, saveSong, allTags } = useSongs();
   const { t } = useTranslation();
   const router = useRouter();
+  const navigation = useNavigation();
 
   const existingSong = useMemo(() => (id ? getSongById(id) : undefined), [id, getSongById]);
 
-  const [songId] = useState<string>(() => existingSong?.id || String(Date.now()));
+  const [songId] = useState<string>(() => existingSong?.id || String(Date.now()) + '_' + Math.random().toString(36).slice(2, 7));
   const songIdRef = useRef<string>(songId);
 
   const [title, setTitle] = useState<string>(existingSong?.title || '');
@@ -111,14 +119,16 @@ export default function EditorScreenRoute() {
     pushContent(text);
   };
 
-  const [prevContent, setPrevContent] = useState<string>(content);
-  if (content !== prevContent) {
-    setPrevContent(content);
-    setLiveContent(content);
-  }
+  const contentRef = useRef(content);
+  useEffect(() => {
+    if (content !== contentRef.current) {
+      contentRef.current = content;
+      setLiveContent(content);
+    }
+  }, [content]);
 
   useEffect(() => {
-    if (settings.autoSave) {
+    if (settings.autoSave && !(id && !existingSong)) {
       if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
       autoSaveTimer.current = setTimeout(() => {
         persistDraft();
@@ -127,7 +137,7 @@ export default function EditorScreenRoute() {
     return () => {
       if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     };
-  }, [settings.autoSave, persistDraft]);
+  }, [id, existingSong, settings.autoSave, persistDraft]);
 
   const handleChordInsert = (chordString: string) => {
     const before = liveContent.substring(0, cursorPosition);
@@ -142,6 +152,36 @@ export default function EditorScreenRoute() {
   const handleSave = () => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     persistDraft();
+  };
+
+  const allowRemovalRef = useRef<boolean>(false);
+  useEffect(() => {
+    return navigation.addListener('beforeRemove', (event) => {
+      if (allowRemovalRef.current || !settings.autoSave || (id && !existingSong)) return;
+
+      event.preventDefault();
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+      persistDraft();
+      allowRemovalRef.current = true;
+      navigation.dispatch(event.data.action);
+    });
+  }, [id, existingSong, navigation, persistDraft, settings.autoSave]);
+
+  useEffect(() => {
+    if (!showChordPicker) return;
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      setShowChordPicker(false);
+      return true;
+    });
+    return () => subscription.remove();
+  }, [showChordPicker]);
+
+  const handleBackPress = () => {
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    if (settings.autoSave) {
+      persistDraft();
+      allowRemovalRef.current = true;
+    }
     if (router.canGoBack()) {
       router.back();
     } else {
@@ -149,17 +189,20 @@ export default function EditorScreenRoute() {
     }
   };
 
-  const handleBackPress = () => {
-    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
-    if (settings.autoSave) {
-      persistDraft();
-    }
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/');
-    }
-  };
+  if (id && !existingSong) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={[styles.header, { borderBottomColor: theme.border }]}>
+          <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+            <Text style={[styles.backText, { color: theme.primary }]}>{t('editor.back')}</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.notFoundContainer}>
+          <Text style={[styles.notFoundText, { color: theme.textPrimary }]}>{t('library.songNotFound')}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const handleAddTag = () => {
     const trimmed = tagInput.trim().toLowerCase();
@@ -361,6 +404,8 @@ const styles = StyleSheet.create({
   contentArea: { flex: 1 },
   editorWrapper: { flex: 1 },
   editor: { flex: 1, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', padding: 20, textAlignVertical: 'top' },
+  notFoundContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  notFoundText: { fontSize: 18, fontWeight: '600' },
   tagSection: { marginTop: 10 },
   tagList: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 6 },
   tagChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12, gap: 4 },

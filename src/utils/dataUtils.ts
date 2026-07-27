@@ -104,14 +104,14 @@ export function exportLibrary(
 export function parseImportedContent(content: string): Song[] {
   if (!content || !content.trim()) return [];
 
-  const rawBlocks = content.split(/\n---\n|\n===\n/);
+  const rawBlocks = content.split(/\n---\n/);
   const songs: Song[] = [];
 
   for (let i = 0; i < rawBlocks.length; i++) {
     const block = rawBlocks[i].trim();
     if (!block) continue;
 
-    let title = '';
+    let title = 'Untitled';
     let artist = '';
     let originalKey = '';
     let tags: string[] = [];
@@ -133,9 +133,9 @@ export function parseImportedContent(content: string): Song[] {
         .filter(Boolean);
     }
 
-    if (!title) {
+    if (!title || title === 'Untitled') {
       const firstLine = block.split('\n')[0].replace(/[{}[\]]/g, '').trim();
-      title = firstLine ? firstLine.slice(0, 30) : `Imported Song ${i + 1}`;
+      title = firstLine ? firstLine.slice(0, 30) : 'Untitled';
     }
 
     const cleanContent = block

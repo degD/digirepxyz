@@ -1,46 +1,43 @@
 import React from 'react';
+import type { ComponentProps } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useRouter, usePathname } from 'expo-router';
+import { Tabs } from 'expo-router';
 import { useSettings } from '@/context/SettingsContext';
 import { useTranslation } from '@/i18n';
 
-export interface BottomNavProps {
-  activeTab?: string;
-  onTabPress?: (tab: string) => void;
-}
+export type BottomNavProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>>[0];
 
 const TAB_ITEMS = [
-  { key: 'library', icon: '♫', route: '/' },
-  { key: 'settings', icon: '⚙', route: '/settings' },
+  { key: 'index', labelKey: 'library', icon: '♫' },
+  { key: 'settings', labelKey: 'settings', icon: '⚙' },
 ];
 
-export default function BottomNav({ activeTab, onTabPress }: BottomNavProps) {
+export default function BottomNav({ state, navigation, insets }: BottomNavProps) {
   const { theme } = useSettings();
   const { t } = useTranslation();
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const currentTab = activeTab || (pathname === '/settings' ? 'settings' : 'library');
-
-  const handlePress = (item: (typeof TAB_ITEMS)[number]) => {
-    if (onTabPress) {
-      onTabPress(item.key);
-    } else {
-      if (item.route === '/') {
-        router.replace('/');
-      } else {
-        router.push(item.route as any);
-      }
-    }
-  };
 
   return (
-    <View style={[styles.container, { borderTopColor: theme.border, backgroundColor: theme.background + 'F2' }]}>
-      {TAB_ITEMS.map((item) => {
-        const label = t(`nav.${item.key}`);
-        const isActive = currentTab === item.key;
+    <View style={[styles.container, { borderTopColor: theme.border, backgroundColor: theme.background + 'F2', paddingBottom: insets.bottom + 12 }]}>
+      {state.routes.map((route, index) => {
+        const item = TAB_ITEMS.find((tab) => tab.key === route.name);
+        if (!item) return null;
+        const label = t(`nav.${item.labelKey}`);
+        const isActive = state.index === index;
         return (
-          <TouchableOpacity key={item.key} style={styles.tab} onPress={() => handlePress(item)}>
+          <TouchableOpacity
+            key={route.key}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: isActive }}
+            accessibilityLabel={label}
+            style={styles.tab}
+            onPress={() => {
+              const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+              if (!isActive && !event.defaultPrevented) {
+                navigation.navigate(route.name, route.params);
+              }
+            }}
+            onLongPress={() => navigation.emit({ type: 'tabLongPress', target: route.key })}
+          >
             <Text style={[styles.icon, { color: isActive ? theme.primary : theme.textSecondary }]}>{item.icon}</Text>
             <Text style={[styles.label, { color: isActive ? theme.primary : theme.textSecondary }]}>{label}</Text>
           </TouchableOpacity>

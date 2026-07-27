@@ -25,7 +25,8 @@
     "exportComplete": "Dışa Aktarma Tamamlandı",
     "exportFailed": "Dışa Aktarma Başarısız",
     "importComplete": "İçe Aktarma Tamamlandı",
-    "importFailed": "İçe Aktarma Başarısız"
+    "importFailed": "İçe Aktarma Başarısız",
+    "importedSuccess": "{{count}} şarkı içe aktarıldı"
   },
   "help": {
     "app": "1) Kütüphane: şarkıları gözatın, arayın, filtreleyin ve favorilere ekleyin.\n2) + butonu: yeni şarkı oluşturun.\n3) Düzenleme modu: ham ChordPro metni yazın ve Kaydet'e dokunun.\n4) Görüntüleme modu: transpoze ve şarkıya özel yazı tipi boyutu kontrolü kullanın.\n5) Ayarlar: akor rengi, otomatik kaydetme ve diyagramları özelleştirin.",
@@ -45,6 +46,7 @@
     "favorites": "Favoriler",
     "songsCount": "{{count}} şarkı",
     "noSongs": "Şarkı bulunamadı",
+    "songNotFound": "Şarkı bulunamadı",
     "emptyFavorites": "Favorilere eklemek için bir şarkıda ♡ simgesine dokunun",
     "emptyDefault": "Farklı bir arama veya filtre deneyin"
   },
@@ -58,5 +60,13 @@
     "artist": "Sanatçı",
     "addTag": "Etiket ekle...",
     "editorPlaceholder": "ChordPro sözlerini yazmaya başlayın...\nÖrnek: [C]Merhaba [G]Dünya"
+  },
+  "colors": {
+    "Blue": "Mavi",
+    "Green": "Yeşil",
+    "Purple": "Mor",
+    "Red": "Kırmızı",
+    "Orange": "Turuncu",
+    "Pink": "Pembe"
   }
 }

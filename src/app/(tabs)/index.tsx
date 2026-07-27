@@ -8,7 +8,6 @@ import { useSongs } from '@/context/SongsContext';
 import SongItem from '@/components/SongItem';
 import SearchBar from '@/components/SearchBar';
 import FilterTabs, { TabItem } from '@/components/FilterTabs';
-import BottomNav from '@/components/BottomNav';
 import { shareSong } from '@/utils/dataUtils';
 import { Song } from '@/types/song';
 
@@ -64,7 +63,7 @@ export default function LibraryScreenRoute() {
 
   const handleSongPress = useCallback(
     (song: Song) => {
-      router.push({ pathname: '/viewer', params: { id: song.id } });
+      router.push({ pathname: '/viewer/[id]', params: { id: song.id } });
     },
     [router]
   );
@@ -134,7 +133,6 @@ export default function LibraryScreenRoute() {
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
 
-      <BottomNav activeTab="library" />
     </SafeAreaView>
   );
 }

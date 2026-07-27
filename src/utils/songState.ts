@@ -26,5 +26,5 @@ export function upsertSong(
   const content = typeof songData?.content === 'string' ? songData.content : '';
   if (content.trim() === '') return existingSongs;
 
-  return [{ ...selectedSong, ...songData } as Song, ...existingSongs];
+  return [{ id: '', title: '', content: '', ...selectedSong, ...songData }, ...existingSongs];
 }

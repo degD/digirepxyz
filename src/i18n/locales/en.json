@@ -25,7 +25,8 @@
     "exportComplete": "Export Complete",
     "exportFailed": "Export Failed",
     "importComplete": "Import Complete",
-    "importFailed": "Import Failed"
+    "importFailed": "Import Failed",
+    "importedSuccess": "Imported {{count}} song(s)"
   },
   "help": {
     "app": "1) Library: browse, search, filter, and favorite songs.\n2) + button: create a new song.\n3) Edit mode: type raw ChordPro text and tap Save.\n4) View mode: use transpose and per-song font-size controls.\n5) Settings: customize chord color, autosave, and diagrams.",
@@ -45,6 +46,7 @@
     "favorites": "Favorites",
     "songsCount": "{{count}} songs",
     "noSongs": "No songs found",
+    "songNotFound": "Song not found",
     "emptyFavorites": "Tap ♡ on a song to add favorites",
     "emptyDefault": "Try a different search or filter"
   },
@@ -58,5 +60,13 @@
     "artist": "Artist",
     "addTag": "Add tag...",
     "editorPlaceholder": "Start typing ChordPro lyrics...\nExample: [C]Hello [G]World"
+  },
+  "colors": {
+    "Blue": "Blue",
+    "Green": "Green",
+    "Purple": "Purple",
+    "Red": "Red",
+    "Orange": "Orange",
+    "Pink": "Pink"
   }
 }

@@ -1,7 +1,12 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { SettingsProvider } from '@/context/SettingsContext';
-import SettingsScreenRoute from '../settings';
+import SettingsScreenRoute from '@/app/(tabs)/settings';
+
+jest.mock('react-native-safe-area-context', () => ({
+  SafeAreaView: ({ children }: any) => <>{children}</>,
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+}));
 
 const mockImportSongs = jest.fn();
 
