@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, usePathname } from 'expo-router';
 import { useSettings } from '@/context/SettingsContext';
 import { useTranslation } from '@/i18n';
@@ -19,6 +20,7 @@ export default function BottomNav({ activeTab, onTabPress }: BottomNavProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
+  const insets = useSafeAreaInsets();
 
   const currentTab = activeTab || (pathname === '/settings' ? 'settings' : 'library');
 
@@ -35,7 +37,7 @@ export default function BottomNav({ activeTab, onTabPress }: BottomNavProps) {
   };
 
   return (
-    <View style={[styles.container, { borderTopColor: theme.border, backgroundColor: theme.background + 'F2' }]}>
+    <View style={[styles.container, { borderTopColor: theme.border, backgroundColor: theme.background + 'F2', paddingBottom: insets.bottom + 12 }]}>
       {TAB_ITEMS.map((item) => {
         const label = t(`nav.${item.key}`);
         const isActive = currentTab === item.key;

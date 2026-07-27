@@ -7,6 +7,12 @@ import SettingsScreenRoute from '../settings';
 import ViewerScreenRoute from '../viewer';
 import EditorScreenRoute from '../editor';
 
+jest.mock('react-native-safe-area-context', () => ({
+  SafeAreaProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  SafeAreaView: ({ children, style }: any) => <>{children}</>,
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+}));
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({
     push: jest.fn(),

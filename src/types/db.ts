@@ -9,6 +9,7 @@ export interface SongTableEntity {
   original_key?: string | null;
   content: string;
   is_favorite: boolean;
+  font_scale: number;
   tags?: string | null; // serialized string or JSON array
   created_at: number;
   updated_at: number;

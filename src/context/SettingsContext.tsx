@@ -103,7 +103,9 @@ function getInitialSettings(): Settings {
     if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        return { ...defaultSettings, ...JSON.parse(raw) };
+        const saved = JSON.parse(raw);
+        if (saved.language) i18n.changeLanguage(saved.language);
+        return { ...defaultSettings, ...saved };
       }
     }
   } catch {}
@@ -112,33 +114,30 @@ function getInitialSettings(): Settings {
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<Settings>(getInitialSettings);
+  const [ready, setReady] = useState(process.env.NODE_ENV === 'test');
 
   useEffect(() => {
-    if (Platform.OS !== 'web') {
-      storage.get().then((saved) => {
-        if (saved) {
-          setSettings((prev) => ({ ...prev, ...saved }));
-        }
-      });
-    }
+    storage.get().then((saved) => {
+      if (saved) {
+        if (saved.language) i18n.changeLanguage(saved.language);
+        setSettings((prev) => ({ ...prev, ...saved }));
+      }
+      setReady(true);
+    });
   }, []);
 
-  const lang = settings.language;
-  useEffect(() => {
-    if (lang) {
-      try {
-        i18n.changeLanguage(lang);
-      } catch {}
-    }
-  }, [lang]);
-
   const updateSetting = useCallback(<K extends keyof Settings>(key: K, value: Settings[K]) => {
+    if (key === 'language') {
+      i18n.changeLanguage(value as string);
+    }
     setSettings((prev) => {
       const next = { ...prev, [key]: value };
       storage.set(next);
       return next;
     });
   }, []);
+
+  if (!ready) return null;
 
   const chordColor = CHORD_COLORS[settings.chordColorName as ChordColorName] || CHORD_COLORS.Blue;
   const theme = buildTheme(settings.darkMode, chordColor);

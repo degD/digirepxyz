@@ -25,7 +25,8 @@
     "exportComplete": "Export abgeschlossen",
     "exportFailed": "Export fehlgeschlagen",
     "importComplete": "Import abgeschlossen",
-    "importFailed": "Import fehlgeschlagen"
+    "importFailed": "Import fehlgeschlagen",
+    "importedSuccess": "{{count}} Song(s) importiert"
   },
   "help": {
     "app": "1) Bibliothek: durchsuchen, suchen, filtern und Songs als Favoriten markieren.\n2) + Button: einen neuen Song erstellen.\n3) Bearbeitungsmodus: Rohes ChordPro-Text eingeben und Speichern drücken.\n4) Ansichtsmodus: Transposition und pro-Song Schriftgrößensteuerung verwenden.\n5) Einstellungen: Akkordfarbe, automatische Speicherung und Diagramme anpassen.",
@@ -45,6 +46,7 @@
     "favorites": "Favoriten",
     "songsCount": "{{count}} Lieder",
     "noSongs": "Keine Lieder gefunden",
+    "songNotFound": "Lied nicht gefunden",
     "emptyFavorites": "Tippe ♡ bei einem Lied, um es zu deinen Favoriten hinzuzufügen",
     "emptyDefault": "Versuche eine andere Suche oder einen anderen Filter"
   },
@@ -58,5 +60,13 @@
     "artist": "Interpret",
     "addTag": "Tag hinzufügen...",
     "editorPlaceholder": "Beginne ChordPro-Text zu schreiben...\nBeispiel: [C]Hallo [G]Welt"
+  },
+  "colors": {
+    "Blue": "Blau",
+    "Green": "Grün",
+    "Purple": "Lila",
+    "Red": "Rot",
+    "Orange": "Orange",
+    "Pink": "Pink"
   }
 }

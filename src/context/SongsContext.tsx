@@ -27,7 +27,13 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
     let isMounted = true;
     loadSongs(INITIAL_SONGS)
       .then((loaded) => {
-        if (isMounted && loaded && loaded.length > 0) setSongs(loaded);
+        if (isMounted && loaded && loaded.length > 0) {
+          setSongs((prev) => {
+            const loadedIds = new Set(loaded.map((s) => s.id));
+            const extras = prev.filter((s) => !loadedIds.has(s.id));
+            return [...loaded, ...extras];
+          });
+        }
       })
       .finally(() => {
         if (isMounted) setHasHydrated(true);

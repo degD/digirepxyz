@@ -25,7 +25,7 @@ export default function ChordSheet({ content, transpose = 0, fontScale = DEFAULT
   };
 
   const effectiveContent = transpose !== 0 ? transposeContent(content, transpose) : content;
-  const parsedLines = parseChordPro(effectiveContent);
+  const parsedLines = useMemo(() => parseChordPro(effectiveContent), [effectiveContent]);
 
   const uniqueChords = useMemo(() => {
     const chords = new Set<string>();

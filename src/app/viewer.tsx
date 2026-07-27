@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from '@/i18n';
 import { useSettings } from '@/context/SettingsContext';
 import { useSongs } from '@/context/SongsContext';
+import BottomNav from '@/components/BottomNav';
 import ChordSheet from '@/components/ChordSheet';
 import { FONT_SCALE_STEP, MIN_FONT_SCALE, getSongFontScale } from '@/utils/fontScale';
 
@@ -53,103 +54,115 @@ export default function ViewerScreenRoute() {
 
   if (!song) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
         <View style={[styles.header, { borderBottomColor: theme.border }]}>
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Text style={[styles.backText, { color: theme.primary }]}>{t('editor.back')}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.notFoundContainer}>
-          <Text style={[styles.notFoundText, { color: theme.textPrimary }]}>{t('library.noSongs')}</Text>
+          <Text style={[styles.notFoundText, { color: theme.textPrimary }]}>{t('library.songNotFound')}</Text>
         </View>
+        <BottomNav activeTab="library" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.border }]}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Text style={[styles.backText, { color: theme.primary }]}>{t('editor.back')}</Text>
         </TouchableOpacity>
 
-        <View style={styles.headerActions}>
-          <View style={styles.readControls}>
-            <TouchableOpacity
-              onPress={() => toggleFavorite(song.id)}
-              style={styles.favoriteButton}
-            >
-              <Text style={[styles.favoriteIcon, { color: song.isFavorite ? '#ef4444' : theme.textSecondary + '66' }]}>
-                {song.isFavorite ? '♥' : '♡'}
-              </Text>
-            </TouchableOpacity>
-
-            <View style={styles.transposeControls}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.headerActionsScroll}>
+          <View style={styles.headerActions}>
+            <View style={styles.readControls}>
               <TouchableOpacity
-                testID="split-toggle"
-                accessibilityLabel="split-toggle"
-                style={[styles.transposeButton, { borderColor: theme.border }, isSplit && { backgroundColor: theme.primary }]}
-                onPress={() => setIsSplit((prev) => !prev)}
+                onPress={() => toggleFavorite(song.id)}
+                style={styles.favoriteButton}
               >
-                <Text style={[styles.transposeButtonText, { color: isSplit ? '#ffffff' : theme.primary }]}>⇆</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.transposeButton, { borderColor: theme.border }]}
-                onPress={() => setTransposeOffset((prev) => prev - 1)}
-              >
-                <Text style={[styles.transposeButtonText, { color: theme.primary }]}>-T</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.transposeButton, { borderColor: theme.border }]}
-                onPress={() => setTransposeOffset((prev) => prev + 1)}
-              >
-                <Text style={[styles.transposeButtonText, { color: theme.primary }]}>+T</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={[styles.separator, { backgroundColor: theme.border }]} />
-
-            <View style={styles.fontSizeControls}>
-              <TouchableOpacity
-                testID="font-size-decrease"
-                style={[
-                  styles.transposeButton,
-                  { borderColor: theme.border },
-                  songFontScale <= MIN_FONT_SCALE && styles.buttonDisabled,
-                ]}
-                onPress={decreaseFontSize}
-                disabled={songFontScale <= MIN_FONT_SCALE}
-              >
-                <Text
-                  style={[
-                    styles.transposeButtonText,
-                    { color: songFontScale <= MIN_FONT_SCALE ? theme.textSecondary + '44' : theme.primary },
-                  ]}
-                >
-                  -A
+                <Text style={[styles.favoriteIcon, { color: song.isFavorite ? '#ef4444' : theme.textSecondary + '66' }]}>
+                  {song.isFavorite ? '♥' : '♡'}
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                testID="font-size-increase"
-                style={[styles.transposeButton, { borderColor: theme.border }]}
-                onPress={increaseFontSize}
-              >
-                <Text style={[styles.transposeButtonText, { color: theme.primary }]}>+A</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
 
-          <TouchableOpacity style={[styles.editButton, { backgroundColor: theme.primary }]} onPress={handleEdit}>
-            <Text style={styles.editText}>{t('editor.edit')}</Text>
-          </TouchableOpacity>
-        </View>
+              <View style={styles.transposeControls}>
+                <TouchableOpacity
+                  testID="split-toggle"
+                  accessibilityLabel="split-toggle"
+                  style={[styles.transposeButton, { borderColor: theme.border }, isSplit && { backgroundColor: theme.primary }]}
+                  onPress={() => setIsSplit((prev) => !prev)}
+                >
+                  <Text style={[styles.transposeButtonText, { color: isSplit ? '#ffffff' : theme.primary }]}>⇆</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.transposeButton, { borderColor: theme.border }]}
+                  onPress={() => setTransposeOffset((prev) => prev - 1)}
+                >
+                  <Text style={[styles.transposeButtonText, { color: theme.primary }]}>-T</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.transposeButton, { borderColor: theme.border }]}
+                  onPress={() => setTransposeOffset((prev) => prev + 1)}
+                >
+                  <Text style={[styles.transposeButtonText, { color: theme.primary }]}>+T</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={[styles.separator, { backgroundColor: theme.border }]} />
+
+              <View style={styles.fontSizeControls}>
+                <TouchableOpacity
+                  testID="font-size-decrease"
+                  style={[
+                    styles.transposeButton,
+                    { borderColor: theme.border },
+                    songFontScale <= MIN_FONT_SCALE && styles.buttonDisabled,
+                  ]}
+                  onPress={decreaseFontSize}
+                  disabled={songFontScale <= MIN_FONT_SCALE}
+                >
+                  <Text
+                    style={[
+                      styles.transposeButtonText,
+                      { color: songFontScale <= MIN_FONT_SCALE ? theme.textSecondary + '44' : theme.primary },
+                    ]}
+                  >
+                    -A
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  testID="font-size-increase"
+                  style={[styles.transposeButton, { borderColor: theme.border }]}
+                  onPress={increaseFontSize}
+                >
+                  <Text style={[styles.transposeButtonText, { color: theme.primary }]}>+A</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <TouchableOpacity style={[styles.editButton, { backgroundColor: theme.primary }]} onPress={handleEdit}>
+              <Text style={styles.editText}>{t('editor.edit')}</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </View>
 
       {/* Meta Section */}
       <View style={[styles.metaSection, { borderBottomColor: theme.border }]}>
         <Text style={[styles.titleText, { color: theme.textPrimary }]}>{song.title}</Text>
         {song.artist && <Text style={[styles.artistText, { color: theme.textSecondary }]}>{song.artist}</Text>}
+        {song.tags && song.tags.length > 0 && (
+          <View style={styles.tagRow}>
+            {song.tags.map((tag) => (
+              <View key={tag} style={[styles.tagChip, { backgroundColor: theme.primary + '1A' }]}>
+                <Text style={[styles.tagChipText, { color: theme.primary }]}>{tag}</Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
 
       {/* Main Content Area */}
@@ -170,6 +183,8 @@ export default function ViewerScreenRoute() {
           </View>
         )}
       </View>
+
+      <BottomNav activeTab="library" />
     </SafeAreaView>
   );
 }
@@ -179,11 +194,11 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
   },
+  headerActionsScroll: { flex: 1 },
   backButton: { paddingVertical: 4, paddingRight: 16 },
   backText: { fontSize: 16, fontWeight: '600' },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -201,6 +216,9 @@ const styles = StyleSheet.create({
   metaSection: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12, borderBottomWidth: 1 },
   titleText: { fontSize: 22, fontWeight: '700' },
   artistText: { fontSize: 15, fontWeight: '500', marginTop: 2 },
+  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
+  tagChip: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 },
+  tagChipText: { fontSize: 12, fontWeight: '600' },
   contentArea: { flex: 1 },
   singlePane: { flex: 1 },
   splitContainer: { flex: 1, flexDirection: 'row' },

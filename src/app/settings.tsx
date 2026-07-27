@@ -8,11 +8,6 @@ import BottomNav from '@/components/BottomNav';
 import { exportLibrary, triggerFileImport } from '@/utils/dataUtils';
 import { ChordColorName } from '@/types/settings';
 
-const CHORD_COLOR_OPTIONS = (Object.keys(CHORD_COLORS) as ChordColorName[]).map((name) => ({
-  name,
-  color: CHORD_COLORS[name],
-}));
-
 const LANG_OPTIONS = [
   { code: 'en', label: 'English' },
   { code: 'es', label: 'Español' },
@@ -197,6 +192,12 @@ export default function SettingsScreenRoute() {
   const { songs, importSongs } = useSongs();
   const { t } = useTranslation();
 
+  const chordColorOptions = (Object.keys(CHORD_COLORS) as ChordColorName[]).map((name) => ({
+    name,
+    color: CHORD_COLORS[name],
+    label: t('colors.' + name),
+  }));
+
   const [activePicker, setActivePicker] = useState<'color' | 'language' | null>(null);
   const [activeInfo, setActiveInfo] = useState<'usage' | 'syntax' | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -216,27 +217,6 @@ export default function SettingsScreenRoute() {
       }
     });
   };
-
-  const usageInfoMessage = `Repertoire helps musicians view and manage ChordPro formatted song sheets.
-
-• Browse & Filter: Search by title, artist, or key, and filter by tags or favorites.
-• Song Viewer: Transpose chords on the fly, adjust font size, and use split screen mode for dual-page views.
-• Editor: Easily compose or edit songs, insert chord tags using the chord picker, and utilize multi-level undo/redo.
-• Import/Export: Backup your full library as standard ChordPro files or share individual songs.`;
-
-  const syntaxInfoMessage = `ChordPro Syntax Guide:
-
-1. Chords inline: Surround chord names in square brackets inside lyric text.
-   Example: [C]Hello [G]world
-
-2. Directives: Place directives in curly braces.
-   {title: Song Title}
-   {artist: Artist Name}
-   {key: C}
-
-3. Sections:
-   {start_of_chorus} ... {end_of_chorus}
-   {start_of_verse} ... {end_of_verse}`;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
@@ -264,8 +244,16 @@ export default function SettingsScreenRoute() {
           <SettingRow
             icon="🎨"
             label={t('settings.chordColor')}
-            value={settings.chordColorName}
+            value={t('colors.' + settings.chordColorName)}
             onPress={() => setActivePicker('color')}
+            theme={theme}
+          />
+          <SettingRow
+            icon="🎸"
+            label={t('settings.chordDiagrams')}
+            hasSwitch
+            switchValue={settings.showChordDiagrams}
+            onToggle={(val) => updateSetting('showChordDiagrams', val)}
             theme={theme}
           />
         </SettingSection>
@@ -297,7 +285,7 @@ export default function SettingsScreenRoute() {
 
         {/* Help & About */}
         <SettingSection title={t('settings.help')} theme={theme}>
-          <SettingRow icon="❓" label={t('settings.howToUse')} onPress={() => setActiveInfo('usage')} theme={theme} />
+          <SettingRow icon="❓" label={t('settings.howToUseLabel')} onPress={() => setActiveInfo('usage')} theme={theme} />
           <SettingRow icon="🎼" label={t('settings.chordProSyntax')} onPress={() => setActiveInfo('syntax')} theme={theme} />
         </SettingSection>
 
@@ -310,7 +298,7 @@ export default function SettingsScreenRoute() {
       <PickerModal
         visible={activePicker === 'color'}
         title={t('settings.chordColor')}
-        options={CHORD_COLOR_OPTIONS}
+        options={chordColorOptions}
         selectedValue={settings.chordColorName}
         onSelect={(val) => {
           updateSetting('chordColorName', val as ChordColorName);
@@ -336,20 +324,20 @@ export default function SettingsScreenRoute() {
       {/* Info Modals */}
       <InfoModal
         visible={activeInfo === 'usage'}
-        title="How to Use Repertoire"
-        message={usageInfoMessage}
+        title={t('settings.howToUseTitle')}
+        message={t('help.app')}
         onClose={() => setActiveInfo(null)}
         theme={theme}
-        closeText="Close"
+        closeText={t('common.close')}
       />
 
       <InfoModal
         visible={activeInfo === 'syntax'}
-        title="ChordPro Syntax Guide"
-        message={syntaxInfoMessage}
+        title={t('settings.chordProSyntax')}
+        message={t('help.chordpro')}
         onClose={() => setActiveInfo(null)}
         theme={theme}
-        closeText="Close"
+        closeText={t('common.close')}
       />
 
       <BottomNav activeTab="settings" />

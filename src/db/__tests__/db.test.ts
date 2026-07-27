@@ -39,6 +39,7 @@ describe('Database Layer (Phase 4)', () => {
       };
 
       const entity = songToEntity(song);
+      expect(entity.font_scale).toBe(1);
       expect(entity).toEqual({
         id: 'song-1',
         title: 'Amazing Grace',
@@ -46,6 +47,7 @@ describe('Database Layer (Phase 4)', () => {
         original_key: 'G',
         content: '[G]Amazing grace how [C]sweet the [G]sound',
         is_favorite: true,
+        font_scale: 1,
         tags: '["hymn","traditional"]',
         created_at: 1000,
         updated_at: 2000,
@@ -60,6 +62,7 @@ describe('Database Layer (Phase 4)', () => {
         original_key: 'Bm',
         content: '[Bm]On a dark desert highway',
         is_favorite: false,
+        font_scale: 1.25,
         tags: '["rock","70s"]',
         created_at: 3000,
         updated_at: 4000,
@@ -73,6 +76,7 @@ describe('Database Layer (Phase 4)', () => {
         originalKey: 'Bm',
         content: '[Bm]On a dark desert highway',
         isFavorite: false,
+        fontScale: 1.25,
         tags: ['rock', '70s'],
         createdAt: 3000,
         updatedAt: 4000,
@@ -87,6 +91,7 @@ describe('Database Layer (Phase 4)', () => {
         original_key: null,
         content: 'Test content',
         is_favorite: false,
+        font_scale: 1,
         tags: 'pop, acoustic',
         created_at: 5000,
         updated_at: 6000,

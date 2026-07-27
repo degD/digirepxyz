@@ -64,7 +64,7 @@ export default function EditorScreenRoute() {
 
   const existingSong = useMemo(() => (id ? getSongById(id) : undefined), [id, getSongById]);
 
-  const [songId] = useState<string>(() => existingSong?.id || String(Date.now()));
+  const [songId] = useState<string>(() => existingSong?.id || String(Date.now()) + '_' + Math.random().toString(36).slice(2, 7));
   const songIdRef = useRef<string>(songId);
 
   const [title, setTitle] = useState<string>(existingSong?.title || '');
@@ -111,11 +111,13 @@ export default function EditorScreenRoute() {
     pushContent(text);
   };
 
-  const [prevContent, setPrevContent] = useState<string>(content);
-  if (content !== prevContent) {
-    setPrevContent(content);
-    setLiveContent(content);
-  }
+  const contentRef = useRef(content);
+  useEffect(() => {
+    if (content !== contentRef.current) {
+      contentRef.current = content;
+      setLiveContent(content);
+    }
+  }, [content]);
 
   useEffect(() => {
     if (settings.autoSave) {
@@ -142,11 +144,6 @@ export default function EditorScreenRoute() {
   const handleSave = () => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     persistDraft();
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/');
-    }
   };
 
   const handleBackPress = () => {
