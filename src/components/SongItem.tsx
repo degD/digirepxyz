@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, GestureResponderEvent } from 'react-native';
 import { useSettings } from '@/context/SettingsContext';
+import { useTranslation } from '@/i18n';
 import { Song } from '@/types/song';
 
 export interface SongItemProps {
@@ -9,7 +10,7 @@ export interface SongItemProps {
   onToggleFavorite?: (id: string) => void;
   onDelete?: (id: string) => void;
   onAddToSetlist?: () => void;
-  onShare?: (song: Song) => void;
+  onExport?: (song: Song) => void;
 }
 
 export default function SongItem({
@@ -18,9 +19,10 @@ export default function SongItem({
   onToggleFavorite,
   onDelete,
   onAddToSetlist,
-  onShare,
+  onExport,
 }: SongItemProps) {
   const { theme } = useSettings();
+  const { t } = useTranslation();
   const [showActions, setShowActions] = useState(false);
 
   const stopProp = (e: GestureResponderEvent) => {
@@ -70,16 +72,17 @@ export default function SongItem({
                   <Text style={[styles.actionText, { color: '#ef4444' }]}>🗑 Delete</Text>
                 </TouchableOpacity>
               )}
-              {onShare && (
+              {onExport && (
                 <TouchableOpacity
+                  testID="song-export-action"
                   style={[styles.actionButton, { backgroundColor: theme.primary + '06' }]}
                   onPress={(e) => {
                     stopProp(e);
-                    onShare(song);
+                    onExport(song);
                     setShowActions(false);
                   }}
                 >
-                  <Text style={[styles.actionText, { color: theme.primary }]}>🔗 Share</Text>
+                  <Text style={[styles.actionText, { color: theme.primary }]}>↓ {t('library.exportSong')}</Text>
                 </TouchableOpacity>
               )}
               {onAddToSetlist && (

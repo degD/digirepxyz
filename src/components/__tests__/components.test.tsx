@@ -2,6 +2,7 @@ import React from 'react';
 import renderer, { act } from 'react-test-renderer';
 import { SettingsProvider } from '@/context/SettingsContext';
 import SongItem from '../SongItem';
+import ExportOptionsModal from '../ExportOptionsModal';
 import SearchBar from '../SearchBar';
 import FilterTabs from '../FilterTabs';
 import ChordSheet from '../ChordSheet';
@@ -45,6 +46,51 @@ describe('SongItem', () => {
       songItemComponent.props.onPress(mockSong);
     });
     expect(onPress).toHaveBeenCalledWith(mockSong);
+  });
+
+  it('renders and calls the single-song export action', () => {
+    const onExport = jest.fn();
+    const tree = renderWithProvider(<SongItem song={mockSong} onPress={() => {}} onExport={onExport} />);
+    const songItemTouchable = tree.root.findAll(
+      (node) => typeof node.props.onLongPress === 'function'
+    )[0];
+
+    act(() => {
+      songItemTouchable.props.onLongPress();
+    });
+
+    const exportAction = tree.root.findByProps({ testID: 'song-export-action' });
+    act(() => {
+      exportAction.props.onPress({ stopPropagation: () => {} });
+    });
+
+    expect(onExport).toHaveBeenCalledWith(mockSong);
+  });
+});
+
+describe('ExportOptionsModal', () => {
+  it('returns the selected export method', () => {
+    const onSelect = jest.fn();
+    const tree = renderWithProvider(
+      <ExportOptionsModal
+        visible
+        title="Export"
+        saveLabel="Save"
+        shareLabel="Share"
+        cancelLabel="Cancel"
+        onSelect={onSelect}
+        onClose={() => {}}
+        theme={{ background: '#ffffff', border: '#dddddd', primary: '#208AEF', textPrimary: '#000000' }}
+      />
+    );
+
+    act(() => {
+      tree.root.findByProps({ testID: 'export-save-option' }).props.onPress();
+      tree.root.findByProps({ testID: 'export-share-option' }).props.onPress();
+    });
+
+    expect(onSelect).toHaveBeenNthCalledWith(1, 'save');
+    expect(onSelect).toHaveBeenNthCalledWith(2, 'share');
   });
 });
 

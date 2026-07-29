@@ -4,6 +4,7 @@
     "appearance": "DARSTELLUNG",
     "editor": "EDITOR",
     "data": "DATEN",
+    "behavior": "VERHALTEN",
     "help": "HILFE",
     "about": "ÜBER",
     "darkMode": "Dunkler Modus",
@@ -11,7 +12,7 @@
     "autoSave": "Automatisches Speichern",
     "chordDiagrams": "Akkorddiagramme",
     "exportLibrary": "Bibliothek exportieren",
-    "importSongs": "Songs importieren",
+    "importSongs": "Song(s) importieren",
     "importSingleSong": "Einzelnen Song importieren",
     "howToUseLabel": "Wie man die App benutzt",
     "howToUseTitle": "Wie man Repertoire benutzt",
@@ -33,7 +34,10 @@
     "chordpro": "ChordPro Kurzsyntax:\n- Akkorde inline: [C]Erstaunliche [G]Gnade\n- Titel-Direktive: {title: Mein Lied}\n- Tonart-Direktive: {key: G}\n- Künstler-Direktive: {artist: Meine Band}\n- Tags-Direktive: {tags: anbetung, akustisch}\n\nBeispiel:\n{title: Erstaunliche Gnade}\n{key: G}\n[G]Erstaunliche [C]Gnade, wie [G]süß der [D]Klang"
   },
   "common": {
-    "close": "Schließen"
+    "close": "Schließen",
+    "save": "Speichern",
+    "share": "Teilen",
+    "cancel": "Abbrechen"
   },
   "nav": {
     "library": "Bibliothek",
@@ -48,7 +52,8 @@
     "noSongs": "Keine Lieder gefunden",
     "songNotFound": "Lied nicht gefunden",
     "emptyFavorites": "Tippe ♡ bei einem Lied, um es zu deinen Favoriten hinzuzufügen",
-    "emptyDefault": "Versuche eine andere Suche oder einen anderen Filter"
+    "emptyDefault": "Versuche eine andere Suche oder einen anderen Filter",
+    "exportSong": "Exportieren"
   },
   "editor": {
     "back": "← Zurück",

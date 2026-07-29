@@ -4,6 +4,7 @@
     "appearance": "APPARENCE",
     "editor": "ÉDITEUR",
     "data": "DONNÉES",
+    "behavior": "COMPORTEMENT",
     "help": "AIDE",
     "about": "À PROPOS",
     "darkMode": "Mode sombre",
@@ -11,7 +12,7 @@
     "autoSave": "Enregistrement automatique",
     "chordDiagrams": "Diagrammes d'accords",
     "exportLibrary": "Exporter la bibliothèque",
-    "importSongs": "Importer des chansons",
+    "importSongs": "Importer une/des chanson(s)",
     "importSingleSong": "Importer une seule chanson",
     "howToUseLabel": "Comment utiliser l'application",
     "howToUseTitle": "Comment utiliser Repertoire",
@@ -33,7 +34,10 @@
     "chordpro": "Syntaxe rapide ChordPro :\n- Accords en ligne : [C]Grâce [G]incroyable\n- Directive titre : {title: Ma Chanson}\n- Directive tonalité : {key: G}\n- Directive artiste : {artist: Mon Groupe}\n- Directive tags : {tags: adoration, acoustique}\n\nExemple :\n{title: Grâce Incroyable}\n{key: G}\n[G]Grâce [C]incroyable, quel [G]doux [D]son"
   },
   "common": {
-    "close": "Fermer"
+    "close": "Fermer",
+    "save": "Enregistrer",
+    "share": "Partager",
+    "cancel": "Annuler"
   },
   "nav": {
     "library": "Bibliothèque",
@@ -48,7 +52,8 @@
     "noSongs": "Aucune chanson trouvée",
     "songNotFound": "Chanson non trouvée",
     "emptyFavorites": "Appuyez sur ♡ sur une chanson pour ajouter aux favoris",
-    "emptyDefault": "Essayez une autre recherche ou un autre filtre"
+    "emptyDefault": "Essayez une autre recherche ou un autre filtre",
+    "exportSong": "Exporter"
   },
   "editor": {
     "back": "← Retour",

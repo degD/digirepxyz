@@ -4,6 +4,7 @@
     "appearance": "GÖRÜNÜM",
     "editor": "DÜZENLEYİCİ",
     "data": "VERİ",
+    "behavior": "DAVRANIŞ",
     "help": "YARDIM",
     "about": "HAKKINDA",
     "darkMode": "Karanlık Mod",
@@ -11,7 +12,7 @@
     "autoSave": "Otomatik Kaydet",
     "chordDiagrams": "Akor Diyagramları",
     "exportLibrary": "Kütüphaneyi Dışa Aktar",
-    "importSongs": "Şarkıları İçe Aktar",
+    "importSongs": "Şarkı(ları) İçe Aktar",
     "importSingleSong": "Tek Şarkı İçe Aktar",
     "howToUseLabel": "Uygulamayı Kullanma",
     "howToUseTitle": "Repertoire Kullanımı",
@@ -33,7 +34,10 @@
     "chordpro": "ChordPro kısa sözdizimi:\n- Akorlar satır içi: [C]Harika [G]lütuf\n- Başlık direktifi: {title: Benim Şarkım}\n- Ton direktifi: {key: G}\n- Sanatçı direktifi: {artist: Benim Grubum}\n- Etiketler direktifi: {tags: ibadet, akustik}\n\nÖrnek:\n{title: Harika Lütuf}\n{key: G}\n[G]Harika [C]lütuf ne [G]tatlı bir [D]ses"
   },
   "common": {
-    "close": "Kapat"
+    "close": "Kapat",
+    "save": "Kaydet",
+    "share": "Paylaş",
+    "cancel": "İptal"
   },
   "nav": {
     "library": "Kütüphane",
@@ -48,7 +52,8 @@
     "noSongs": "Şarkı bulunamadı",
     "songNotFound": "Şarkı bulunamadı",
     "emptyFavorites": "Favorilere eklemek için bir şarkıda ♡ simgesine dokunun",
-    "emptyDefault": "Farklı bir arama veya filtre deneyin"
+    "emptyDefault": "Farklı bir arama veya filtre deneyin",
+    "exportSong": "Dışa Aktar"
   },
   "editor": {
     "back": "← Geri",

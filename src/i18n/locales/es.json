@@ -4,6 +4,7 @@
     "appearance": "ASPECTO",
     "editor": "EDITOR",
     "data": "DATOS",
+    "behavior": "COMPORTAMIENTO",
     "help": "AYUDA",
     "about": "ACERCA DE",
     "darkMode": "Modo oscuro",
@@ -11,7 +12,7 @@
     "autoSave": "Guardado automático",
     "chordDiagrams": "Diagramas de acordes",
     "exportLibrary": "Exportar biblioteca",
-    "importSongs": "Importar canciones",
+    "importSongs": "Importar canción(es)",
     "importSingleSong": "Importar una sola canción",
     "howToUseLabel": "Cómo usar la aplicación",
     "howToUseTitle": "Cómo usar Repertoire",
@@ -33,7 +34,10 @@
     "chordpro": "Sintaxis rápida de ChordPro:\n- Acordes en línea: [C]Asombrosa [G]gracia\n- Directiva de título: {title: Mi Canción}\n- Directiva de tonalidad: {key: G}\n- Directiva de artista: {artist: Mi Banda}\n- Directiva de etiquetas: {tags: adoración, acústico}\n\nEjemplo:\n{title: Asombrosa Gracia}\n{key: G}\n[G]Asombrosa [C]gracia, qué [G]dulce el [D]sonido"
   },
   "common": {
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "save": "Guardar",
+    "share": "Compartir",
+    "cancel": "Cancelar"
   },
   "nav": {
     "library": "Biblioteca",
@@ -48,7 +52,8 @@
     "noSongs": "No se encontraron canciones",
     "songNotFound": "Canción no encontrada",
     "emptyFavorites": "Toca ♡ en una canción para agregar a favoritos",
-    "emptyDefault": "Prueba otra búsqueda o filtro"
+    "emptyDefault": "Prueba otra búsqueda o filtro",
+    "exportSong": "Exportar"
   },
   "editor": {
     "back": "← Atrás",

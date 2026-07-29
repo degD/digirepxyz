@@ -126,12 +126,12 @@ Implemented fetures will be shown with a (+) symbol at the beginning.
 For example, `n. (+) Feature XYZ` is a "completed" feature.
 The feature to work on will be given by user.
 
-1. Single song easy import & export.
+1. (+) Single song easy import & export.
 2. "Open with" on mobile by filetype to import.
 3. Importing from PDF, single and bulk.
 4. Importing from Word, single and bulk.
 5. Exporting to PDF and Word.
 6. Cloud sync.
 7. Searching the web for songs.
-8. Easy "share song" button.
+8. (+) Easy "share song" button.
 9. System tests.

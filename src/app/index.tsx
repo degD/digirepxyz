@@ -9,7 +9,9 @@ import SongItem from '@/components/SongItem';
 import SearchBar from '@/components/SearchBar';
 import FilterTabs, { TabItem } from '@/components/FilterTabs';
 import BottomNav from '@/components/BottomNav';
-import { shareSong } from '@/utils/dataUtils';
+import { exportSong } from '@/utils/dataUtils';
+import type { ExportMethod } from '@/utils/dataUtils';
+import ExportOptionsModal from '@/components/ExportOptionsModal';
 import { Song } from '@/types/song';
 
 export default function LibraryScreenRoute() {
@@ -20,6 +22,7 @@ export default function LibraryScreenRoute() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
+  const [songToExport, setSongToExport] = useState<Song | null>(null);
 
   const handleFilterPress = (tabKey: string) => {
     setActiveFilter(tabKey);
@@ -73,6 +76,15 @@ export default function LibraryScreenRoute() {
     router.push('/editor');
   };
 
+  const handleSongExport = useCallback((song: Song) => {
+    setSongToExport(song);
+  }, []);
+
+  const handleExportMethod = useCallback((method: ExportMethod) => {
+    if (songToExport) exportSong(songToExport, method);
+    setSongToExport(null);
+  }, [songToExport]);
+
   const renderItem = useCallback(
     ({ item }: { item: Song }) => (
       <SongItem
@@ -80,10 +92,10 @@ export default function LibraryScreenRoute() {
         onPress={handleSongPress}
         onToggleFavorite={toggleFavorite}
         onDelete={deleteSong}
-        onShare={(s) => shareSong(s)}
+        onExport={handleSongExport}
       />
     ),
-    [handleSongPress, toggleFavorite, deleteSong]
+    [handleSongPress, toggleFavorite, deleteSong, handleSongExport]
   );
 
   return (
@@ -133,6 +145,17 @@ export default function LibraryScreenRoute() {
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
+
+      <ExportOptionsModal
+        visible={songToExport !== null}
+        title={t('library.exportSong')}
+        saveLabel={t('common.save')}
+        shareLabel={t('common.share')}
+        cancelLabel={t('common.cancel')}
+        onSelect={handleExportMethod}
+        onClose={() => setSongToExport(null)}
+        theme={theme}
+      />
 
       <BottomNav activeTab="library" />
     </SafeAreaView>

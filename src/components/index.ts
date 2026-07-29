@@ -18,3 +18,6 @@ export type { SearchBarProps } from './SearchBar';
 
 export { default as SongItem } from './SongItem';
 export type { SongItemProps } from './SongItem';
+
+export { default as ExportOptionsModal } from './ExportOptionsModal';
+export type { ExportOptionsModalProps } from './ExportOptionsModal';

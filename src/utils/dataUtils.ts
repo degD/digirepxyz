@@ -15,47 +15,54 @@ function toSafeFilename(title?: string): string {
   return safe || 'song';
 }
 
-/**
- * Exports all songs in the library into a combined ChordPro text file (.cho).
- * Triggers a web download on web platforms or system share sheet via `expo-file-system` and `expo-sharing` on native.
- *
- * @param songs - Array of songs to export.
- * @param onStatus - Optional callback for reporting status updates or error messages.
- * @returns Status object containing `success` boolean and status message string.
- */
-export function exportLibrary(
-  songs: Song[],
-  onStatus?: StatusCallback
-): { success: boolean; message: string } {
-  const content = songs
-    .map((song) => {
-      return [
-        `{title: ${song.title}}`,
-        song.artist ? `{artist: ${song.artist}}` : null,
-        song.originalKey ? `{key: ${song.originalKey}}` : null,
-        song.tags && song.tags.length > 0 ? `{tags: ${song.tags.join(', ')}}` : null,
-        '',
-        song.content || '',
-        '',
-        '---',
-        '',
-      ]
-        .filter(Boolean)
-        .join('\n');
-    })
-    .join('\n');
+export type ExportMethod = 'save' | 'share';
 
+function formatSongAsChordPro(song: Song): string {
+  return [
+    `{title: ${song.title}}`,
+    song.artist ? `{artist: ${song.artist}}` : null,
+    song.originalKey ? `{key: ${song.originalKey}}` : null,
+    song.tags && song.tags.length > 0 ? `{tags: ${song.tags.join(', ')}}` : null,
+    '',
+    song.content || '',
+    '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+function exportText(
+  content: string,
+  fileName: string,
+  method: ExportMethod,
+  shareTitle: string,
+  onStatus: StatusCallback | undefined,
+  webMessage: string,
+  nativeMessage: string
+): { success: boolean; message: string } {
   if (Platform.OS === 'web') {
+    if (method === 'share') {
+      try {
+        const webNavigator = navigator as Navigator & {
+          share?: (data: { title: string; text: string }) => Promise<void>;
+        };
+        if (webNavigator.share) {
+          webNavigator.share({ title: shareTitle, text: content }).catch(() => {});
+          return { success: true, message: 'Shared via navigator.share' };
+        }
+      } catch {}
+    }
+
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `repertoire_export_${new Date().toISOString().slice(0, 10)}.cho`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
     URL.revokeObjectURL(url);
-    return { success: true, message: `Exported ${songs.length} songs` };
+    return { success: true, message: webMessage };
   }
 
   try {
@@ -66,32 +73,75 @@ export function exportLibrary(
 
     (async () => {
       try {
-        const fileName = `repertoire_export_${new Date().toISOString().slice(0, 10)}.cho`;
         const file = new File(Paths.cache, fileName);
         file.write(content);
 
-        const isAvailable = await Sharing.isAvailableAsync();
-        if (isAvailable) {
+        if (method === 'save') {
+          // saveDocuments opens the native Save As dialog instead of the Share sheet.
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
+          const DocumentsPicker = require('@react-native-documents/picker');
+          const results = await DocumentsPicker.saveDocuments({
+            sourceUris: [file.uri],
+            fileName,
+            mimeType: 'text/plain',
+            copy: true,
+          });
+          const result = results[0];
+          if (result?.error) {
+            if (onStatus) onStatus({ type: 'error', message: `Save failed: ${result.error}` });
+          } else if (onStatus) {
+            onStatus({ type: 'success', message: `Saved ${fileName}` });
+          }
+        } else if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(file.uri, {
             mimeType: 'text/plain',
-            dialogTitle: 'Export Library',
+            dialogTitle: shareTitle,
           });
-        } else {
-          if (onStatus) onStatus({ type: 'error', message: 'Sharing is not available on this device.' });
+        } else if (onStatus) {
+          onStatus({ type: 'error', message: 'Sharing is not available on this device.' });
         }
-      } catch (err: any) {
-        console.warn('Native export failed', err);
-        if (onStatus) onStatus({ type: 'error', message: `Native export failed: ${err.message}` });
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (onStatus) onStatus({ type: 'error', message: `Export failed: ${message}` });
       }
     })();
 
-    return { success: true, message: `Preparing native export for ${songs.length} songs...` };
-  } catch (err) {
-    console.warn('Native export dependencies unavailable', err);
-    if (onStatus) onStatus({ type: 'error', message: 'Native export requires expo-file-system and expo-sharing.' });
+    return { success: true, message: nativeMessage };
+  } catch {
+    if (onStatus) {
+      onStatus({ type: 'error', message: 'Native export requires expo-file-system and expo-sharing' });
+    }
+    return { success: false, message: 'Export failed' };
   }
+}
 
-  return { success: false, message: 'Export failed (missing packages)' };
+/**
+ * Exports all songs in the library into a combined ChordPro text file (.cho).
+ * Triggers a web download on web platforms or system share sheet via `expo-file-system` and `expo-sharing` on native.
+ *
+ * @param songs - Array of songs to export.
+ * @param method - Whether to save the file or open sharing.
+ * @param onStatus - Optional callback for reporting status updates or error messages.
+ * @returns Status object containing `success` boolean and status message string.
+ */
+export function exportLibrary(
+  songs: Song[],
+  method: ExportMethod = 'save',
+  onStatus?: StatusCallback
+): { success: boolean; message: string } {
+  const content = songs.map(formatSongAsChordPro).join('\n---\n');
+  const fileName = `repertoire_export_${new Date().toISOString().slice(0, 10)}.cho`;
+  const action = method === 'share' ? 'Share' : 'Save';
+
+  return exportText(
+    content,
+    fileName,
+    method,
+    `${action} Library`,
+    onStatus,
+    `Exported ${songs.length} songs`,
+    `Preparing ${method} for ${songs.length} songs...`
+  );
 }
 
 /**
@@ -252,77 +302,31 @@ export function triggerFileImport(
 }
 
 /**
- * Shares a single song using system share sheet on native devices, `navigator.share`, or web download fallback.
+ * Exports one song as a ChordPro `.cho` file.
+ * `save` uses the system file destination flow on native platforms; `share` uses sharing.
  *
- * @param song - The target `Song` object to share.
- * @param onStatus - Optional callback for status reporting.
- * @returns Status object containing `success` boolean and status message.
+ * @param song - Song to export.
+ * @param method - Whether to save the file or open sharing.
+ * @param onStatus - Optional callback for reporting status updates or error messages.
  */
-export function shareSong(
+export function exportSong(
   song: Song,
+  method: ExportMethod = 'save',
   onStatus?: StatusCallback
 ): { success: boolean; message: string } {
-  const content = [
-    `{title: ${song.title}}`,
-    song.artist ? `{artist: ${song.artist}}` : null,
-    song.originalKey ? `{key: ${song.originalKey}}` : null,
-    song.tags && song.tags.length > 0 ? `{tags: ${song.tags.join(', ')}}` : null,
-    '',
-    song.content || '',
-    '',
-  ]
-    .filter(Boolean)
-    .join('\n');
+  const content = formatSongAsChordPro(song);
+  const fileName = `${toSafeFilename(song.title)}.cho`;
+  const action = method === 'share' ? 'Share' : 'Save';
 
-  if (Platform.OS === 'web') {
-    try {
-      if (typeof navigator !== 'undefined' && (navigator as any).share) {
-        (navigator as any).share({ title: song.title, text: content }).catch(() => {});
-        return { success: true, message: 'Shared via navigator.share' };
-      }
-    } catch {}
-
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${toSafeFilename(song.title)}.cho`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    return { success: true, message: 'Downloaded song' };
-  }
-
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { File, Paths } = require('expo-file-system');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const Sharing = require('expo-sharing');
-
-    (async () => {
-      try {
-        const fileName = `${toSafeFilename(song.title)}.cho`;
-        const file = new File(Paths.cache, fileName);
-        file.write(content);
-
-        const isAvailable = await Sharing.isAvailableAsync();
-        if (isAvailable) {
-          await Sharing.shareAsync(file.uri, {
-            mimeType: 'text/plain',
-            dialogTitle: `Share ${song.title}`,
-          });
-        } else if (onStatus) onStatus({ type: 'error', message: 'Sharing is not available on this device.' });
-      } catch (err: any) {
-        if (onStatus) onStatus({ type: 'error', message: `Error sharing song: ${err.message}` });
-      }
-    })();
-
-    return { success: true, message: 'Preparing native share...' };
-  } catch {
-    if (onStatus) onStatus({ type: 'error', message: 'Native share requires expo-file-system and expo-sharing' });
-  }
-  return { success: false, message: 'Share failed' };
+  return exportText(
+    content,
+    fileName,
+    method,
+    `${action} ${song.title}`,
+    onStatus,
+    `Exported ${song.title}`,
+    `Preparing ${method} for ${song.title}...`
+  );
 }
 
 /**

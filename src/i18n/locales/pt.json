@@ -4,6 +4,7 @@
     "appearance": "APARÊNCIA",
     "editor": "EDITOR",
     "data": "DADOS",
+    "behavior": "COMPORTAMENTO",
     "help": "AJUDA",
     "about": "SOBRE",
     "darkMode": "Modo escuro",
@@ -11,7 +12,7 @@
     "autoSave": "Salvar automaticamente",
     "chordDiagrams": "Diagramas de acordes",
     "exportLibrary": "Exportar biblioteca",
-    "importSongs": "Importar músicas",
+    "importSongs": "Importar música(s)",
     "importSingleSong": "Importar música única",
     "howToUseLabel": "Como usar o app",
     "howToUseTitle": "Como usar Repertoire",
@@ -33,7 +34,10 @@
     "chordpro": "Sintaxe rápida ChordPro:\n- Acordes inline: [C]Graça [G]incrível\n- Diretiva de título: {title: Minha Música}\n- Diretiva de tonalidade: {key: G}\n- Diretiva de artista: {artist: Minha Banda}\n- Diretiva de tags: {tags: adoração, acústico}\n\nExemplo:\n{title: Graça Incrível}\n{key: G}\n[G]Graça [C]incrível, quão [G]doce o [D]som"
   },
   "common": {
-    "close": "Fechar"
+    "close": "Fechar",
+    "save": "Guardar",
+    "share": "Partilhar",
+    "cancel": "Cancelar"
   },
   "nav": {
     "library": "Biblioteca",
@@ -48,7 +52,8 @@
     "noSongs": "Nenhuma música encontrada",
     "songNotFound": "Música não encontrada",
     "emptyFavorites": "Toque ♡ em uma música para adicionar aos favoritos",
-    "emptyDefault": "Tente uma pesquisa ou filtro diferente"
+    "emptyDefault": "Tente uma pesquisa ou filtro diferente",
+    "exportSong": "Exportar"
   },
   "editor": {
     "back": "← Voltar",

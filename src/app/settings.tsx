@@ -5,7 +5,9 @@ import { useTranslation } from '@/i18n';
 import { useSettings, CHORD_COLORS } from '@/context/SettingsContext';
 import { useSongs } from '@/context/SongsContext';
 import BottomNav from '@/components/BottomNav';
+import ExportOptionsModal from '@/components/ExportOptionsModal';
 import { exportLibrary, triggerFileImport } from '@/utils/dataUtils';
+import type { ExportMethod } from '@/utils/dataUtils';
 import { ChordColorName } from '@/types/settings';
 
 const LANG_OPTIONS = [
@@ -201,9 +203,15 @@ export default function SettingsScreenRoute() {
   const [activePicker, setActivePicker] = useState<'color' | 'language' | null>(null);
   const [activeInfo, setActiveInfo] = useState<'usage' | 'syntax' | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [showExportOptions, setShowExportOptions] = useState(false);
 
   const handleExport = () => {
-    const res = exportLibrary(songs, (status) => {
+    setShowExportOptions(true);
+  };
+
+  const handleExportMethod = (method: ExportMethod) => {
+    setShowExportOptions(false);
+    const res = exportLibrary(songs, method, (status) => {
       setStatusMessage(status.message);
     });
     setStatusMessage(res.message);
@@ -215,6 +223,8 @@ export default function SettingsScreenRoute() {
         importSongs(imported);
         setStatusMessage(t('settings.importedSuccess', { count: imported.length }));
       }
+    }, (status) => {
+      setStatusMessage(status.message);
     });
   };
 
@@ -318,6 +328,17 @@ export default function SettingsScreenRoute() {
           setActivePicker(null);
         }}
         onClose={() => setActivePicker(null)}
+        theme={theme}
+      />
+
+      <ExportOptionsModal
+        visible={showExportOptions}
+        title={t('settings.exportLibrary')}
+        saveLabel={t('common.save')}
+        shareLabel={t('common.share')}
+        cancelLabel={t('common.cancel')}
+        onSelect={handleExportMethod}
+        onClose={() => setShowExportOptions(false)}
         theme={theme}
       />
 

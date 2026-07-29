@@ -4,6 +4,7 @@
     "appearance": "APPEARANCE",
     "editor": "EDITOR",
     "data": "DATA",
+    "behavior": "BEHAVIOR",
     "help": "HELP",
     "about": "ABOUT",
     "darkMode": "Dark Mode",
@@ -11,7 +12,7 @@
     "autoSave": "Auto Save",
     "chordDiagrams": "Chord Diagrams",
     "exportLibrary": "Export Library",
-    "importSongs": "Import Songs",
+    "importSongs": "Import Song(s)",
     "importSingleSong": "Import Single Song",
     "howToUseLabel": "How to Use the App",
     "howToUseTitle": "How to Use Repertoire",
@@ -33,7 +34,10 @@
     "chordpro": "ChordPro quick syntax:\n- Chords inline: [C]Amazing [G]grace\n- Title directive: {title: My Song}\n- Key directive: {key: G}\n- Artist directive: {artist: My Band}\n- Tags directive: {tags: worship, acoustic}\n\nExample:\n{title: Amazing Grace}\n{key: G}\n[G]Amazing [C]grace how [G]sweet the [D]sound"
   },
   "common": {
-    "close": "Close"
+    "close": "Close",
+    "save": "Save",
+    "share": "Share",
+    "cancel": "Cancel"
   },
   "nav": {
     "library": "Library",
@@ -48,7 +52,8 @@
     "noSongs": "No songs found",
     "songNotFound": "Song not found",
     "emptyFavorites": "Tap ♡ on a song to add favorites",
-    "emptyDefault": "Try a different search or filter"
+    "emptyDefault": "Try a different search or filter",
+    "exportSong": "Export"
   },
   "editor": {
     "back": "← Back",

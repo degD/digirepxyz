@@ -50,6 +50,21 @@ describe('SettingsScreen', () => {
     expect(getByText('ChordPro Syntax')).toBeTruthy();
   });
 
+  it('labels the combined single or multiple song import action', async () => {
+    const { getByText } = await renderSettings();
+
+    expect(getByText('Import Song(s)')).toBeTruthy();
+  });
+
+  it('opens export options from the library export setting', async () => {
+    const { getByText, getByTestId } = await renderSettings();
+
+    await fireEvent.press(getByText('Export Library'));
+
+    expect(getByTestId('export-save-option')).toBeTruthy();
+    expect(getByTestId('export-share-option')).toBeTruthy();
+  });
+
   it('uses an in-app modal for help content', async () => {
     const { getByText } = await renderSettings();
 
