@@ -1,4 +1,4 @@
-import { exportLibrary, exportSong, parseImportedContent, triggerFileImport } from '../dataUtils';
+import { exportLibrary, exportSong, importSongsFromUri, parseImportedContent, triggerFileImport } from '../dataUtils';
 import { Song } from '@/types';
 
 const mockWrite = jest.fn();
@@ -69,7 +69,7 @@ describe('dataUtils - exportSong', () => {
     expect(DocumentsPicker.saveDocuments).toHaveBeenCalledWith({
       sourceUris: ['file://test/mock.cho'],
       fileName: 'My_Song.cho',
-      mimeType: 'text/plain',
+      mimeType: 'application/x-chordpro',
       copy: true,
     });
   });
@@ -112,6 +112,75 @@ describe('dataUtils - parseImportedContent', () => {
 
     expect(songs[1].title).toBe('Second Song');
     expect(songs[1].content).toBe('[C]Verse 2');
+  });
+});
+
+describe('dataUtils - importSongsFromUri', () => {
+  beforeEach(() => {
+    jest.spyOn(console, 'info').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('reads and parses a ChordPro file URI', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { File } = require('expo-file-system');
+    const text = jest.fn().mockResolvedValue('{title: Opened Song}\n\n[C]Hello');
+    File.mockImplementation(() => ({ name: 'opened.cho', text }));
+
+    await expect(importSongsFromUri('content://documents/opened.cho')).resolves.toEqual(
+      expect.arrayContaining([expect.objectContaining({ title: 'Opened Song', content: '[C]Hello' })])
+    );
+    expect(text).toHaveBeenCalled();
+  });
+
+  it('validates ChordPro content when the provider hides the extension', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { File } = require('expo-file-system');
+    File.mockImplementation(() => ({
+      name: '1000000034',
+      text: jest.fn().mockResolvedValue('{title: Provider Song}\n\n[Am]Hello'),
+    }));
+
+    await expect(importSongsFromUri('content://media/external/file/1000000034')).resolves.toEqual(
+      expect.arrayContaining([expect.objectContaining({ title: 'Provider Song' })])
+    );
+  });
+
+  it('reports file read errors', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { File } = require('expo-file-system');
+    File.mockImplementation(() => ({
+      text: jest.fn().mockRejectedValue(new Error('permission denied')),
+    }));
+
+    await expect(importSongsFromUri('file:///private/opened.cho')).rejects.toThrow(
+      'Could not read the selected ChordPro file: permission denied'
+    );
+  });
+
+  it('rejects unsupported extensions and non-ChordPro text', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { File } = require('expo-file-system');
+    File.mockImplementation(() => ({
+      name: 'notes.txt',
+      text: jest.fn().mockResolvedValue('Ordinary notes without chords.'),
+    }));
+
+    await expect(importSongsFromUri('content://documents/notes.txt')).rejects.toThrow(
+      'Unsupported file type'
+    );
+
+    File.mockImplementation(() => ({
+      name: 'notes.cho',
+      text: jest.fn().mockResolvedValue('Ordinary notes without chords.'),
+    }));
+    await expect(importSongsFromUri('content://documents/notes.cho')).rejects.toThrow(
+      'not a valid ChordPro document'
+    );
   });
 });
 

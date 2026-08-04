@@ -8,7 +8,29 @@
     "scheme": "digirepxyz",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "UTImportedTypeDeclarations": [
+          {
+            "UTTypeIdentifier": "org.chordpro.chordpro",
+            "UTTypeDescription": "ChordPro document",
+            "UTTypeConformsTo": ["public.text"],
+            "UTTypeTagSpecification": {
+              "public.filename-extension": ["cho", "chordpro"],
+              "public.mime-type": ["application/x-chordpro", "text/x-chordpro"]
+            }
+          }
+        ],
+        "CFBundleDocumentTypes": [
+          {
+            "CFBundleTypeName": "ChordPro document",
+            "CFBundleTypeRole": "Viewer",
+            "LSHandlerRank": "Owner",
+            "LSItemContentTypes": ["org.chordpro.chordpro"],
+            "CFBundleTypeExtensions": ["cho", "chordpro"]
+          }
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +40,19 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.digirepxyz"
+      "package": "com.anonymous.digirepxyz",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "category": ["DEFAULT", "BROWSABLE"],
+          "data": { "mimeType": "text/plain" }
+        },
+        {
+          "action": "VIEW",
+          "category": ["DEFAULT", "BROWSABLE"],
+          "data": { "mimeType": "application/octet-stream" }
+        }
+      ]
     },
     "web": {
       "output": "static",
@@ -34,7 +68,8 @@
           "imageWidth": 76
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "./plugins/withChordProIntentLogging"
     ],
     "experiments": {
       "typedRoutes": true,

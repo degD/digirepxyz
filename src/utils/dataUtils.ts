@@ -1,8 +1,17 @@
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import { Song } from '@/types';
 
 export interface StatusCallback {
   (status: { type: 'error' | 'info' | 'success'; message: string }): void;
+}
+
+const IMPORT_LOG_PREFIX = '[ChordProImport]';
+const IMPORT_LOGGING_ENABLED = Constants.expoConfig?.extra?.chordProImportLoggingEnabled === true;
+
+export function logChordProImport(event: string, details?: Record<string, unknown>): void {
+  if (!IMPORT_LOGGING_ENABLED) return;
+  console.info(IMPORT_LOG_PREFIX, event, details || {});
 }
 
 /**
@@ -83,7 +92,7 @@ function exportText(
           const results = await DocumentsPicker.saveDocuments({
             sourceUris: [file.uri],
             fileName,
-            mimeType: 'text/plain',
+            mimeType: 'application/x-chordpro',
             copy: true,
           });
           const result = results[0];
@@ -211,6 +220,68 @@ export function parseImportedContent(content: string): Song[] {
   }
 
   return songs;
+}
+
+/**
+ * Reads a file URI received from the operating system and parses its ChordPro content.
+ * The URI can be a local file URI or an Android content URI.
+ */
+export async function importSongsFromUri(fileUri: string): Promise<Song[]> {
+  if (!fileUri) {
+    logChordProImport('Rejected empty URI');
+    return [];
+  }
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { File } = require('expo-file-system') as {
+      File: new (uri: string) => {
+        exists?: boolean;
+        name?: string;
+        size?: number;
+        type?: string;
+        text: () => Promise<string>;
+      };
+    };
+    const file = new File(fileUri);
+    const fileName = file.name || decodeURIComponent(fileUri.split(/[/?#]/).pop() || '');
+    logChordProImport('Resolved incoming file', {
+      uri: fileUri,
+      fileName,
+      mimeType: file.type || 'unknown',
+      size: file.size ?? 'unknown',
+      exists: file.exists ?? 'unknown',
+    });
+
+    const hasChordProExtension = /\.(cho|chordpro)$/i.test(fileName);
+    const hasExplicitExtension = /\.[^./]+$/.test(fileName);
+    if (hasExplicitExtension && !hasChordProExtension) {
+      logChordProImport('Rejected unsupported extension', { fileName });
+      throw new Error('Unsupported file type. Select a .cho or .chordpro file.');
+    }
+    if (!hasChordProExtension) {
+      logChordProImport('Provider hid filename extension; validating content', { fileName });
+    }
+
+    const content = await file.text();
+    logChordProImport('Read incoming file', { fileName, characters: content.length });
+    const hasChordProDirective = /\{(?:title|t|artist|a|key|k|tags|comment|c|start_of_chorus|end_of_chorus|soc|eoc|define)\s*(?::|\})/i.test(
+      content
+    );
+    const hasChord = /\[[A-G](?:#|b)?(?:m|maj|min|dim|aug|sus|add|no|[0-9]|[/()+\-])*\]/i.test(content);
+    logChordProImport('Validated ChordPro syntax', { fileName, hasChordProDirective, hasChord });
+    if (!hasChordProDirective && !hasChord) {
+      throw new Error('The selected file is not a valid ChordPro document.');
+    }
+
+    const songs = parseImportedContent(content);
+    logChordProImport('Parsed incoming file', { fileName, songCount: songs.length });
+    return songs;
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    logChordProImport('Import failed', { uri: fileUri, message });
+    throw new Error(`Could not read the selected ChordPro file: ${message}`);
+  }
 }
 
 /**

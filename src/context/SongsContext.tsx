@@ -8,6 +8,7 @@ import { getSongFontScale } from '@/utils/fontScale';
 
 export interface SongsContextValue {
   songs: Song[];
+  isHydrated: boolean;
   allTags: string[];
   saveSong: (songData: Partial<Song> & { id?: string }) => void;
   deleteSong: (id: string) => void;
@@ -90,6 +91,7 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<SongsContextValue>(
     () => ({
       songs,
+      isHydrated: hasHydrated,
       allTags,
       saveSong,
       deleteSong,
@@ -97,7 +99,7 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
       importSongs,
       getSongById,
     }),
-    [songs, allTags, saveSong, deleteSong, toggleFavorite, importSongs, getSongById]
+    [songs, hasHydrated, allTags, saveSong, deleteSong, toggleFavorite, importSongs, getSongById]
   );
 
   return <SongsContext.Provider value={value}>{children}</SongsContext.Provider>;
