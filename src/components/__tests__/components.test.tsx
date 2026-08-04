@@ -74,10 +74,12 @@ describe('ExportOptionsModal', () => {
     const tree = renderWithProvider(
       <ExportOptionsModal
         visible
-        title="Export"
-        saveLabel="Save"
-        shareLabel="Share"
-        cancelLabel="Cancel"
+         title="Export"
+         saveLabel="Save"
+         shareLabel="Share"
+         pdfLabel="Save PDF"
+         wordLabel="Save Word"
+         cancelLabel="Cancel"
         onSelect={onSelect}
         onClose={() => {}}
         theme={{ background: '#ffffff', border: '#dddddd', primary: '#208AEF', textPrimary: '#000000' }}
@@ -87,10 +89,14 @@ describe('ExportOptionsModal', () => {
     act(() => {
       tree.root.findByProps({ testID: 'export-save-option' }).props.onPress();
       tree.root.findByProps({ testID: 'export-share-option' }).props.onPress();
+      tree.root.findByProps({ testID: 'export-pdf-option' }).props.onPress();
+      tree.root.findByProps({ testID: 'export-word-option' }).props.onPress();
     });
 
     expect(onSelect).toHaveBeenNthCalledWith(1, 'save');
     expect(onSelect).toHaveBeenNthCalledWith(2, 'share');
+    expect(onSelect).toHaveBeenNthCalledWith(3, 'pdf');
+    expect(onSelect).toHaveBeenNthCalledWith(4, 'word');
   });
 });
 

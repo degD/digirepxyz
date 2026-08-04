@@ -37,6 +37,10 @@
     "close": "Kapat",
     "save": "Kaydet",
     "share": "Paylaş",
+    "saveChordPro": "ChordPro Kaydet",
+    "shareChordPro": "ChordPro Paylaş",
+    "savePdf": "PDF Kaydet",
+    "saveWord": "Word Kaydet",
     "cancel": "İptal"
   },
   "nav": {

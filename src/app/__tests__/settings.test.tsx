@@ -63,6 +63,8 @@ describe('SettingsScreen', () => {
 
     expect(getByTestId('export-save-option')).toBeTruthy();
     expect(getByTestId('export-share-option')).toBeTruthy();
+    expect(getByTestId('export-pdf-option')).toBeTruthy();
+    expect(getByTestId('export-word-option')).toBeTruthy();
   });
 
   it('uses an in-app modal for help content', async () => {

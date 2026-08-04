@@ -20,6 +20,10 @@ jest.mock('expo-sharing', () => ({
   shareAsync: jest.fn(),
 }), { virtual: true });
 
+jest.mock('expo-print', () => ({
+  printToFileAsync: jest.fn(() => Promise.resolve({ uri: 'file://cache/mock.pdf' })),
+}), { virtual: true });
+
 jest.mock('expo-document-picker', () => ({
   getDocumentAsync: jest.fn(),
 }), { virtual: true });
@@ -42,6 +46,37 @@ describe('dataUtils - exportLibrary', () => {
   it('handles empty song list', () => {
     const result = exportLibrary([]);
     expect(result.success).toBe(true);
+  });
+
+  it('exports the full repertoire as one PDF', async () => {
+    const onStatus = jest.fn();
+    const result = exportLibrary(sampleSongs, 'pdf', onStatus);
+
+    expect(result.message).toContain('Preparing PDF for 1 songs');
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Print = require('expo-print');
+    expect(Print.printToFileAsync).toHaveBeenLastCalledWith(
+      expect.objectContaining({ html: expect.stringContaining('Song 1') })
+    );
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    expect(require('@react-native-documents/picker').saveDocuments).toHaveBeenLastCalledWith(
+      expect.objectContaining({ fileName: expect.stringMatching(/^repertoire_export_.*\.pdf$/) })
+    );
+  });
+
+  it('exports the full repertoire as one Word document', async () => {
+    const onStatus = jest.fn();
+    const result = exportLibrary(sampleSongs, 'word', onStatus);
+
+    expect(result.message).toContain('Preparing Word for 1 songs');
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    expect(require('@react-native-documents/picker').saveDocuments).toHaveBeenLastCalledWith(
+      expect.objectContaining({ fileName: expect.stringMatching(/^repertoire_export_.*\.docx$/) })
+    );
   });
 });
 
@@ -83,6 +118,43 @@ describe('dataUtils - exportSong', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const Sharing = require('expo-sharing');
     expect(Sharing.isAvailableAsync).toHaveBeenCalled();
+  });
+
+  it('prepares a PDF export with a PDF filename', async () => {
+    const onStatus = jest.fn();
+    const result = exportSong({ id: '3', title: 'PDF Song', content: '[C]Hello' }, 'pdf', onStatus);
+
+    expect(result.success).toBe(true);
+    expect(result.message).toContain('Preparing PDF');
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Print = require('expo-print');
+    expect(Print.printToFileAsync).toHaveBeenCalledWith(expect.objectContaining({ html: expect.stringContaining('PDF Song') }));
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    expect(require('@react-native-documents/picker').saveDocuments).toHaveBeenLastCalledWith(
+      expect.objectContaining({ fileName: 'PDF_Song.pdf', mimeType: 'application/pdf' })
+    );
+    expect(onStatus).toHaveBeenCalledWith({ type: 'success', message: 'Saved PDF_Song.pdf' });
+  });
+
+  it('prepares a Word export with a DOCX filename', async () => {
+    const onStatus = jest.fn();
+    const result = exportSong({ id: '4', title: 'Word Song', content: '[G]Hello' }, 'word', onStatus);
+
+    expect(result.success).toBe(true);
+    expect(result.message).toContain('Preparing Word');
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(mockWrite).toHaveBeenCalledWith(expect.any(String), { encoding: 'base64' });
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    expect(require('@react-native-documents/picker').saveDocuments).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        fileName: 'Word_Song.docx',
+        mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      })
+    );
+    expect(onStatus).toHaveBeenCalledWith({ type: 'success', message: 'Saved Word_Song.docx' });
   });
 });
 

@@ -1,6 +1,8 @@
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import { Song } from '@/types';
+import { parseChordPro } from '@/utils/chordProParser';
+import { Document, HeadingLevel, PageBreak, Paragraph, Packer, TextRun } from 'docx';
 
 export interface StatusCallback {
   (status: { type: 'error' | 'info' | 'success'; message: string }): void;
@@ -24,7 +26,7 @@ function toSafeFilename(title?: string): string {
   return safe || 'song';
 }
 
-export type ExportMethod = 'save' | 'share';
+export type ExportMethod = 'save' | 'share' | 'pdf' | 'word';
 
 function formatSongAsChordPro(song: Song): string {
   return [
@@ -38,6 +40,182 @@ function formatSongAsChordPro(song: Song): string {
   ]
     .filter(Boolean)
     .join('\n');
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatChordLineAsHtml(content: string): string {
+  return parseChordPro(content)
+    .map((segments) => {
+      if (segments.length === 1 && segments[0].isDirective) {
+        return `<p class="directive">${escapeHtml(segments[0].text)}</p>`;
+      }
+
+      const hasChords = segments.some((segment) => segment.chord);
+      if (!hasChords) {
+        return `<p class="line">${escapeHtml(segments.map((segment) => segment.text).join('')) || '&nbsp;'}</p>`;
+      }
+
+      const groups = segments
+        .map(
+          (segment) =>
+            `<span class="group"><span class="chord">${escapeHtml(segment.chord || '')}</span><span>${
+              escapeHtml(segment.text) || '&nbsp;'
+            }</span></span>`
+        )
+        .join('');
+      return `<p class="line">${groups}</p>`;
+    })
+    .join('');
+}
+
+function formatSongsAsHtml(songs: Song[]): string {
+  const sections = songs
+    .map(
+      (song) => `
+        <section class="song">
+          <h1>${escapeHtml(song.title)}</h1>
+          ${song.artist ? `<p class="metadata">${escapeHtml(song.artist)}</p>` : ''}
+          ${song.originalKey ? `<p class="metadata">Key: ${escapeHtml(song.originalKey)}</p>` : ''}
+          ${song.tags && song.tags.length > 0 ? `<p class="metadata">${escapeHtml(song.tags.join(', '))}</p>` : ''}
+          <div class="content">${formatChordLineAsHtml(song.content || '')}</div>
+        </section>`
+    )
+    .join('');
+
+  return `<!DOCTYPE html>
+    <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+          @page { margin: 48px; }
+          body { color: #111827; font-family: Arial, sans-serif; font-size: 14px; }
+          .song { page-break-after: always; }
+          .song:last-child { page-break-after: auto; }
+          h1 { font-size: 24px; margin: 0 0 4px; }
+          .metadata { color: #4b5563; margin: 2px 0; }
+          .content { margin-top: 20px; font-family: "Courier New", monospace; }
+          .line { display: flex; margin: 0 0 8px; min-height: 18px; white-space: pre-wrap; }
+          .group { display: inline-flex; flex-direction: column; margin-right: 6px; }
+          .chord { color: #2563eb; font-weight: 700; min-height: 16px; }
+          .directive { color: #4b5563; margin: 0 0 8px; }
+        </style>
+      </head>
+      <body>${sections}</body>
+    </html>`;
+}
+
+function formatSegmentsAsWordParagraphs(content: string): Paragraph[] {
+  return parseChordPro(content).flatMap((segments) => {
+    if (segments.length === 1 && segments[0].isDirective) {
+      return [new Paragraph({ text: segments[0].text })];
+    }
+
+    const hasChords = segments.some((segment) => segment.chord);
+    const lyrics = segments.map((segment) => segment.text).join('') || ' ';
+    if (!hasChords) return [new Paragraph({ text: lyrics })];
+
+    const chords = segments.map((segment) => segment.chord || ' ').join('    ');
+    return [
+      new Paragraph({ children: [new TextRun({ text: chords, bold: true, color: '2563EB' })] }),
+      new Paragraph({ text: lyrics }),
+    ];
+  });
+}
+
+function buildWordDocument(songs: Song[]): Document {
+  const children: Paragraph[] = [];
+
+  songs.forEach((song, index) => {
+    if (index > 0) children.push(new Paragraph({ children: [new PageBreak()] }));
+    children.push(new Paragraph({ text: song.title, heading: HeadingLevel.HEADING_1 }));
+    if (song.artist) children.push(new Paragraph({ text: song.artist }));
+    if (song.originalKey) children.push(new Paragraph({ text: `Key: ${song.originalKey}` }));
+    if (song.tags && song.tags.length > 0) children.push(new Paragraph({ text: `Tags: ${song.tags.join(', ')}` }));
+    children.push(...formatSegmentsAsWordParagraphs(song.content || ''));
+  });
+
+  return new Document({
+    title: songs.length === 1 ? songs[0].title : 'Repertoire',
+    sections: [{ children }],
+  });
+}
+
+function downloadBlob(blob: Blob, fileName: string): void {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = fileName;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+}
+
+async function saveNativeFile(uri: string, fileName: string, mimeType: string): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const DocumentsPicker = require('@react-native-documents/picker');
+  const results = await DocumentsPicker.saveDocuments({
+    sourceUris: [uri],
+    fileName,
+    mimeType,
+    copy: true,
+  });
+  const error = results?.[0]?.error;
+  if (error) throw new Error(String(error));
+}
+
+function startPdfExport(songs: Song[], fileName: string, onStatus?: StatusCallback): void {
+  (async () => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const Print = require('expo-print');
+      const result = await Print.printToFileAsync({ html: formatSongsAsHtml(songs) });
+
+      if (Platform.OS === 'web') {
+        if (onStatus) onStatus({ type: 'success', message: 'PDF save dialog opened' });
+        return;
+      }
+
+      await saveNativeFile(result.uri, fileName, 'application/pdf');
+      if (onStatus) onStatus({ type: 'success', message: `Saved ${fileName}` });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (onStatus) onStatus({ type: 'error', message: `PDF export failed: ${message}` });
+    }
+  })();
+}
+
+function startWordExport(songs: Song[], fileName: string, onStatus?: StatusCallback): void {
+  (async () => {
+    try {
+      const documentFile = buildWordDocument(songs);
+
+      if (Platform.OS === 'web') {
+        const blob = await Packer.toBlob(documentFile);
+        downloadBlob(blob, fileName);
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { File, Paths } = require('expo-file-system');
+        const file = new File(Paths.cache, fileName);
+        const base64 = await Packer.toBase64String(documentFile);
+        await file.write(base64, { encoding: 'base64' });
+        await saveNativeFile(file.uri, fileName, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      }
+
+      if (onStatus) onStatus({ type: 'success', message: `Saved ${fileName}` });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (onStatus) onStatus({ type: 'error', message: `Word export failed: ${message}` });
+    }
+  })();
 }
 
 function exportText(
@@ -139,7 +317,21 @@ export function exportLibrary(
   onStatus?: StatusCallback
 ): { success: boolean; message: string } {
   const content = songs.map(formatSongAsChordPro).join('\n---\n');
-  const fileName = `repertoire_export_${new Date().toISOString().slice(0, 10)}.cho`;
+  const date = new Date().toISOString().slice(0, 10);
+  const fileName = `repertoire_export_${date}.cho`;
+
+  if (method === 'pdf') {
+    const pdfFileName = `repertoire_export_${date}.pdf`;
+    startPdfExport(songs, pdfFileName, onStatus);
+    return { success: true, message: `Preparing PDF for ${songs.length} songs...` };
+  }
+
+  if (method === 'word') {
+    const wordFileName = `repertoire_export_${date}.docx`;
+    startWordExport(songs, wordFileName, onStatus);
+    return { success: true, message: `Preparing Word for ${songs.length} songs...` };
+  }
+
   const action = method === 'share' ? 'Share' : 'Save';
 
   return exportText(
@@ -386,7 +578,21 @@ export function exportSong(
   onStatus?: StatusCallback
 ): { success: boolean; message: string } {
   const content = formatSongAsChordPro(song);
-  const fileName = `${toSafeFilename(song.title)}.cho`;
+  const safeTitle = toSafeFilename(song.title);
+
+  if (method === 'pdf') {
+    const fileName = `${safeTitle}.pdf`;
+    startPdfExport([song], fileName, onStatus);
+    return { success: true, message: `Preparing PDF for ${song.title}...` };
+  }
+
+  if (method === 'word') {
+    const fileName = `${safeTitle}.docx`;
+    startWordExport([song], fileName, onStatus);
+    return { success: true, message: `Preparing Word for ${song.title}...` };
+  }
+
+  const fileName = `${safeTitle}.cho`;
   const action = method === 'share' ? 'Share' : 'Save';
 
   return exportText(

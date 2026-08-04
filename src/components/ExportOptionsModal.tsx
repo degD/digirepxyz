@@ -7,6 +7,8 @@ export interface ExportOptionsModalProps {
   title: string;
   saveLabel: string;
   shareLabel: string;
+  pdfLabel: string;
+  wordLabel: string;
   cancelLabel: string;
   onSelect: (method: ExportMethod) => void;
   onClose: () => void;
@@ -23,6 +25,8 @@ export default function ExportOptionsModal({
   title,
   saveLabel,
   shareLabel,
+  pdfLabel,
+  wordLabel,
   cancelLabel,
   onSelect,
   onClose,
@@ -46,6 +50,20 @@ export default function ExportOptionsModal({
             onPress={() => onSelect('share')}
           >
             <Text style={[styles.optionText, { color: theme.primary }]}>{shareLabel}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            testID="export-pdf-option"
+            style={[styles.option, { borderColor: theme.border }]}
+            onPress={() => onSelect('pdf')}
+          >
+            <Text style={[styles.optionText, { color: theme.primary }]}>{pdfLabel}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            testID="export-word-option"
+            style={[styles.option, { borderColor: theme.border }]}
+            onPress={() => onSelect('word')}
+          >
+            <Text style={[styles.optionText, { color: theme.primary }]}>{wordLabel}</Text>
           </TouchableOpacity>
           <TouchableOpacity testID="export-cancel-option" style={styles.cancel} onPress={onClose}>
             <Text style={[styles.cancelText, { color: theme.textPrimary }]}>{cancelLabel}</Text>

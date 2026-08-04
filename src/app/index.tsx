@@ -149,8 +149,10 @@ export default function LibraryScreenRoute() {
       <ExportOptionsModal
         visible={songToExport !== null}
         title={t('library.exportSong')}
-        saveLabel={t('common.save')}
-        shareLabel={t('common.share')}
+        saveLabel={t('common.saveChordPro')}
+        shareLabel={t('common.shareChordPro')}
+        pdfLabel={t('common.savePdf')}
+        wordLabel={t('common.saveWord')}
         cancelLabel={t('common.cancel')}
         onSelect={handleExportMethod}
         onClose={() => setSongToExport(null)}

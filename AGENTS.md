@@ -130,7 +130,7 @@ The feature to work on will be given by user.
 2. (+) "Open with" on mobile by filetype to import.
 3. Importing from PDF, single and bulk.
 4. Importing from Word, single and bulk.
-5. Exporting to PDF and Word.
+5. (+) Exporting to PDF and Word.
 6. Cloud sync.
 7. Searching the web for songs.
 8. (+) Easy "share song" button.

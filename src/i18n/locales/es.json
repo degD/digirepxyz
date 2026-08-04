@@ -37,6 +37,10 @@
     "close": "Cerrar",
     "save": "Guardar",
     "share": "Compartir",
+    "saveChordPro": "Guardar ChordPro",
+    "shareChordPro": "Compartir ChordPro",
+    "savePdf": "Guardar PDF",
+    "saveWord": "Guardar Word",
     "cancel": "Cancelar"
   },
   "nav": {
