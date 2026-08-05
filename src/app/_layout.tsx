@@ -74,7 +74,7 @@ function AppLayoutInner() {
         if (!isCurrent) return;
         if (songs.length === 0) {
           logChordProImport('Import produced no songs', { incomingUrl });
-          Alert.alert(i18n.t('settings.importFailed'), 'No songs found in the selected ChordPro file.');
+          Alert.alert(i18n.t('settings.importFailed'), i18n.t('settings.noSongsInFile'));
           return;
         }
 

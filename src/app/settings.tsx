@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Switch, StyleSheet, Modal, Platform } from 'react-native';
+import { AppState, View, Text, TouchableOpacity, ScrollView, Switch, StyleSheet, Modal, Platform, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from '@/i18n';
 import { useSettings, CHORD_COLORS } from '@/context/SettingsContext';
@@ -9,6 +9,8 @@ import ExportOptionsModal from '@/components/ExportOptionsModal';
 import { exportLibrary, triggerFileImport } from '@/utils/dataUtils';
 import type { ExportMethod } from '@/utils/dataUtils';
 import { ChordColorName } from '@/types/settings';
+import { getGeminiApiKey, saveGeminiApiKey } from '@/utils/apiKeyStorage';
+import { importDocumentAsSong, pickDocumentForImport } from '@/utils/documentImport';
 
 const LANG_OPTIONS = [
   { code: 'en', label: 'English' },
@@ -204,6 +206,19 @@ export default function SettingsScreenRoute() {
   const [activeInfo, setActiveInfo] = useState<'usage' | 'syntax' | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [showExportOptions, setShowExportOptions] = useState(false);
+  const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [isImportingDocument, setIsImportingDocument] = useState(false);
+
+  React.useEffect(() => {
+    getGeminiApiKey()
+      .then((key) => {
+        if (key) setGeminiApiKey(key);
+      })
+      .catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : String(error);
+        console.warn('[SettingsAIImport] Could not load Gemini API key', { message });
+      });
+  }, []);
 
   const handleExport = () => {
     setShowExportOptions(true);
@@ -226,6 +241,58 @@ export default function SettingsScreenRoute() {
     }, (status) => {
       setStatusMessage(status.message);
     });
+  };
+
+  const handleSaveGeminiApiKey = async () => {
+    console.log('[SettingsAIImport] Saving Gemini API key', { present: Boolean(geminiApiKey.trim()) });
+    try {
+      await saveGeminiApiKey(geminiApiKey);
+      setStatusMessage(geminiApiKey.trim() ? t('settings.apiKeySaved') : t('settings.apiKeyCleared'));
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn('[SettingsAIImport] Could not save Gemini API key', { message });
+      setStatusMessage(t('settings.apiKeySaveFailed'));
+    }
+  };
+
+  const handleDocumentImport = async () => {
+    console.log('[SettingsAIImport] Document import requested', { present: Boolean(geminiApiKey.trim()) });
+    if (!geminiApiKey.trim()) {
+      setStatusMessage(t('settings.apiKeyRequired'));
+      return;
+    }
+
+    setIsImportingDocument(true);
+    setStatusMessage(t('settings.documentImportInProgress'));
+    let abortController: AbortController | null = null;
+    let appStateSubscription: { remove: () => void } | null = null;
+    try {
+      const document = await pickDocumentForImport();
+      if (!document) {
+        setStatusMessage(null);
+        return;
+      }
+      abortController = new AbortController();
+      appStateSubscription = AppState.addEventListener('change', (nextState) => {
+        if (nextState !== 'active') {
+          console.log('[SettingsAIImport] Interrupting document import because app left foreground', { nextState });
+          abortController?.abort();
+        }
+      });
+      const result = await importDocumentAsSong(document, geminiApiKey, () => {
+        setStatusMessage(t('settings.documentImportInProgress'));
+      }, abortController.signal);
+      importSongs([result.song]);
+      setStatusMessage(t('settings.importComplete'));
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const interrupted = abortController?.signal.aborted === true;
+      console.warn('[SettingsAIImport] Document import failed', { message, interrupted });
+      setStatusMessage(interrupted ? t('settings.documentImportInterrupted') : t('settings.documentImportFailed'));
+    } finally {
+      appStateSubscription?.remove();
+      setIsImportingDocument(false);
+    }
   };
 
   return (
@@ -293,6 +360,41 @@ export default function SettingsScreenRoute() {
           <SettingRow icon="📥" label={t('settings.importSongs')} onPress={handleImport} theme={theme} />
         </SettingSection>
 
+        <SettingSection title={t('settings.aiImport')} theme={theme}>
+          <View style={[styles.aiCard, { borderBottomColor: theme.border }]}>
+            <Text style={[styles.aiLabel, { color: theme.textPrimary }]}>{t('settings.geminiApiKey')}</Text>
+            <Text style={[styles.aiDescription, { color: theme.textSecondary }]}>{t('settings.geminiApiKeyDescription')}</Text>
+            <TextInput
+              testID="gemini-api-key-input"
+              value={geminiApiKey}
+              onChangeText={setGeminiApiKey}
+              onBlur={handleSaveGeminiApiKey}
+              placeholder={t('settings.geminiApiKeyPlaceholder')}
+              placeholderTextColor={theme.textSecondary}
+              autoCapitalize="none"
+              autoCorrect={false}
+              style={[styles.apiKeyInput, { color: theme.textPrimary, borderColor: theme.border }]}
+            />
+            <TouchableOpacity
+              testID="save-gemini-api-key"
+              style={[styles.aiButton, { borderColor: theme.primary }]}
+              onPress={handleSaveGeminiApiKey}
+            >
+              <Text style={[styles.aiButtonText, { color: theme.primary }]}>{t('settings.saveApiKey')}</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            testID="import-document"
+            style={[styles.documentImportRow, { borderBottomColor: theme.border }]}
+            onPress={handleDocumentImport}
+            disabled={isImportingDocument}
+          >
+            <Text style={styles.settingIcon}>📄</Text>
+            <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>{t('settings.importDocument')}</Text>
+            {isImportingDocument ? <ActivityIndicator color={theme.primary} /> : <Text style={[styles.chevron, { color: theme.textSecondary }]}>›</Text>}
+          </TouchableOpacity>
+        </SettingSection>
+
         {/* Help & About */}
         <SettingSection title={t('settings.help')} theme={theme}>
           <SettingRow icon="❓" label={t('settings.howToUseLabel')} onPress={() => setActiveInfo('usage')} theme={theme} />
@@ -343,6 +445,16 @@ export default function SettingsScreenRoute() {
         onClose={() => setShowExportOptions(false)}
         theme={theme}
       />
+
+      <Modal visible={isImportingDocument} transparent animationType="fade" onRequestClose={() => {}}>
+        <View testID="document-import-loading-modal" style={styles.loadingOverlay}>
+          <View style={[styles.loadingCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <ActivityIndicator size="large" color={theme.primary} />
+            <Text style={[styles.loadingTitle, { color: theme.textPrimary }]}>{t('settings.documentImportInProgress')}</Text>
+            <Text style={[styles.loadingDescription, { color: theme.textSecondary }]}>{t('settings.documentImportLoadingDescription')}</Text>
+          </View>
+        </View>
+      </Modal>
 
       {/* Info Modals */}
       <InfoModal
@@ -403,4 +515,15 @@ const styles = StyleSheet.create({
   infoCloseText: { color: '#ffffff', fontWeight: '700', fontSize: 14 },
   footer: { marginTop: 32, alignItems: 'center' },
   footerText: { fontSize: 12 },
+  aiCard: { padding: 16, borderBottomWidth: StyleSheet.hairlineWidth },
+  aiLabel: { fontSize: 15, fontWeight: '600', marginBottom: 4 },
+  aiDescription: { fontSize: 12, lineHeight: 18, marginBottom: 12 },
+  apiKeyInput: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 9, fontSize: 14 },
+  aiButton: { alignSelf: 'flex-start', borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, marginTop: 10 },
+  aiButtonText: { fontSize: 13, fontWeight: '700' },
+  documentImportRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
+  loadingOverlay: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.62)', padding: 24 },
+  loadingCard: { width: '100%', maxWidth: 320, borderRadius: 16, borderWidth: 1, alignItems: 'center', padding: 24 },
+  loadingTitle: { fontSize: 17, fontWeight: '700', marginTop: 16, textAlign: 'center' },
+  loadingDescription: { fontSize: 13, lineHeight: 19, marginTop: 8, textAlign: 'center' },
 });

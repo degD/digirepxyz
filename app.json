@@ -3,7 +3,7 @@
     "name": "digirepxyz",
     "slug": "digirepxyz",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "digirepxyz",
     "userInterfaceStyle": "automatic",
@@ -14,10 +14,18 @@
           {
             "UTTypeIdentifier": "org.chordpro.chordpro",
             "UTTypeDescription": "ChordPro document",
-            "UTTypeConformsTo": ["public.text"],
+            "UTTypeConformsTo": [
+              "public.text"
+            ],
             "UTTypeTagSpecification": {
-              "public.filename-extension": ["cho", "chordpro"],
-              "public.mime-type": ["application/x-chordpro", "text/x-chordpro"]
+              "public.filename-extension": [
+                "cho",
+                "chordpro"
+              ],
+              "public.mime-type": [
+                "application/x-chordpro",
+                "text/x-chordpro"
+              ]
             }
           }
         ],
@@ -26,8 +34,13 @@
             "CFBundleTypeName": "ChordPro document",
             "CFBundleTypeRole": "Viewer",
             "LSHandlerRank": "Owner",
-            "LSItemContentTypes": ["org.chordpro.chordpro"],
-            "CFBundleTypeExtensions": ["cho", "chordpro"]
+            "LSItemContentTypes": [
+              "org.chordpro.chordpro"
+            ],
+            "CFBundleTypeExtensions": [
+              "cho",
+              "chordpro"
+            ]
           }
         ]
       }
@@ -44,13 +57,23 @@
       "intentFilters": [
         {
           "action": "VIEW",
-          "category": ["DEFAULT", "BROWSABLE"],
-          "data": { "mimeType": "text/plain" }
+          "category": [
+            "DEFAULT",
+            "BROWSABLE"
+          ],
+          "data": {
+            "mimeType": "text/plain"
+          }
         },
         {
           "action": "VIEW",
-          "category": ["DEFAULT", "BROWSABLE"],
-          "data": { "mimeType": "application/octet-stream" }
+          "category": [
+            "DEFAULT",
+            "BROWSABLE"
+          ],
+          "data": {
+            "mimeType": "application/octet-stream"
+          }
         }
       ]
     },
@@ -69,7 +92,8 @@
         }
       ],
       "expo-sharing",
-      "./plugins/withChordProIntentLogging"
+      "./plugins/withChordProIntentLogging",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
