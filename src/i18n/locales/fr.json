@@ -46,7 +46,23 @@
     "documentImportLoadingDescription": "Gardez Repertoire ouvert pendant la conversion du document.",
     "openWithApiKeyRequired": "Saisissez et enregistrez une clé API Gemini dans les Paramètres avant d'ouvrir un PDF ou DOCX.",
     "noSongReturned": "Gemini n'a renvoyé aucune chanson.",
-    "noSongsInFile": "Aucune chanson trouvée dans le fichier sélectionné."
+    "noSongsInFile": "Aucune chanson trouvée dans le fichier sélectionné.",
+    "syncTitle": "SYNCHRONISATION WEBDAV",
+    "webDavUrl": "URL du dossier WebDAV",
+    "webDavDescription": "Synchronise digirep-sync-v1.json par HTTPS avec un mot de passe d'application.",
+    "webDavUrlPlaceholder": "https://cloud.example.com/remote.php/dav/files/name/digirep/",
+    "webDavUsername": "Identifiant",
+    "webDavUsernamePlaceholder": "Identifiant WebDAV",
+    "webDavPassword": "Mot de passe d'application",
+    "webDavPasswordPlaceholder": "Mot de passe WebDAV",
+    "webDavPasswordSaved": "Enregistre de facon securisee sur cet appareil",
+    "saveSync": "Enregistrer et synchroniser",
+    "syncNow": "Synchroniser",
+    "disconnectSync": "Deconnecter",
+    "syncing": "Synchronisation...",
+    "syncComplete": "Synchronise.",
+    "disconnectSyncTitle": "Déconnecter WebDAV ?",
+    "disconnectSyncDescription": "Cela arrête la synchronisation uniquement sur cet appareil. Vos chansons locales et le fichier WebDAV resteront disponibles."
   },
   "help": {
     "app": "1) Bibliothèque : parcourir, rechercher, filtrer et marquer des chansons comme favorites.\n2) Bouton + : créer une nouvelle chanson.\n3) Mode édition : tapez du texte ChordPro brut et appuyez sur Enregistrer.\n4) Mode lecture : utilisez la transposition et les contrôles de taille de police par chanson.\n5) Paramètres : personnalisez la couleur des accords, l'enregistrement automatique et les diagrammes.",
@@ -60,7 +76,9 @@
     "shareChordPro": "Partager ChordPro",
     "savePdf": "Enregistrer en PDF",
     "saveWord": "Enregistrer sous Word",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "showSecret": "Afficher le secret",
+    "hideSecret": "Masquer le secret"
   },
   "nav": {
     "library": "Bibliothèque",

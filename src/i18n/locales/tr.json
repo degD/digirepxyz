@@ -46,7 +46,23 @@
     "documentImportLoadingDescription": "Belge dönüştürülürken Repertoire uygulamasını açık tutun.",
     "openWithApiKeyRequired": "PDF veya DOCX açmadan önce Ayarlar'da bir Gemini API anahtarı girip kaydedin.",
     "noSongReturned": "Gemini herhangi bir şarkı döndürmedi.",
-    "noSongsInFile": "Seçilen dosyada şarkı bulunamadı."
+    "noSongsInFile": "Seçilen dosyada şarkı bulunamadı.",
+    "syncTitle": "WEBDAV SENKRONIZASYONU",
+    "webDavUrl": "WebDAV klasor URL'si",
+    "webDavDescription": "digirep-sync-v1.json dosyasini HTTPS ve uygulama parolasi ile senkronize eder.",
+    "webDavUrlPlaceholder": "https://cloud.example.com/remote.php/dav/files/name/digirep/",
+    "webDavUsername": "Kullanici adi",
+    "webDavUsernamePlaceholder": "WebDAV kullanici adi",
+    "webDavPassword": "Uygulama parolasi",
+    "webDavPasswordPlaceholder": "WebDAV uygulama parolasi",
+    "webDavPasswordSaved": "Bu cihazda guvenle kaydedildi",
+    "saveSync": "Kaydet ve senkronize et",
+    "syncNow": "Simdi senkronize et",
+    "disconnectSync": "Baglantiyi kes",
+    "syncing": "Senkronize ediliyor...",
+    "syncComplete": "Senkronize edildi.",
+    "disconnectSyncTitle": "WebDAV bağlantısı kesilsin mi?",
+    "disconnectSyncDescription": "Bu işlem yalnızca bu cihazdaki senkronizasyonu durdurur. Yerel şarkılarınız ve WebDAV senkronizasyon dosyası kalır."
   },
   "help": {
     "app": "1) Kütüphane: şarkıları gözatın, arayın, filtreleyin ve favorilere ekleyin.\n2) + butonu: yeni şarkı oluşturun.\n3) Düzenleme modu: ham ChordPro metni yazın ve Kaydet'e dokunun.\n4) Görüntüleme modu: transpoze ve şarkıya özel yazı tipi boyutu kontrolü kullanın.\n5) Ayarlar: akor rengi, otomatik kaydetme ve diyagramları özelleştirin.",
@@ -60,7 +76,9 @@
     "shareChordPro": "ChordPro Paylaş",
     "savePdf": "PDF Kaydet",
     "saveWord": "Word Kaydet",
-    "cancel": "İptal"
+    "cancel": "İptal",
+    "showSecret": "Gizli bilgiyi göster",
+    "hideSecret": "Gizli bilgiyi gizle"
   },
   "nav": {
     "library": "Kütüphane",

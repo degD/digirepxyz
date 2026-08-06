@@ -97,7 +97,7 @@ describe('documentImport', () => {
       ok: true,
       json: async () => response,
     } as Response);
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    Object.defineProperty(globalThis, 'fetch', { configurable: true, value: fetchMock, writable: true });
     const document: PickedDocument = {
       uri: 'file://song.pdf',
       name: 'song.pdf',
@@ -125,7 +125,7 @@ describe('documentImport', () => {
       ok: true,
       json: async () => response,
     } as Response);
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    Object.defineProperty(globalThis, 'fetch', { configurable: true, value: fetchMock, writable: true });
     const bytes = createDocxBytes('<w:document><w:body><w:p><w:r><w:t>[G]Hello</w:t></w:r></w:p></w:body></w:document>');
     const document: PickedDocument = {
       uri: 'file://song.docx',
@@ -151,7 +151,7 @@ describe('documentImport', () => {
       file: { arrayBuffer: async () => new Uint8Array([1]).buffer as ArrayBuffer },
     };
     const fetchMock = jest.fn();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    Object.defineProperty(globalThis, 'fetch', { configurable: true, value: fetchMock, writable: true });
 
     await expect(importDocumentAsSong(document, '')).rejects.toThrow('API key');
     expect(fetchMock).not.toHaveBeenCalled();
@@ -178,7 +178,7 @@ describe('documentImport', () => {
         options?.signal?.addEventListener('abort', () => reject(new Error('request aborted')));
       })
     );
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    Object.defineProperty(globalThis, 'fetch', { configurable: true, value: fetchMock, writable: true });
     const document: PickedDocument = {
       uri: 'file://song.pdf',
       name: 'song.pdf',

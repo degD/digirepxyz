@@ -13,6 +13,16 @@ jest.mock('react-native-safe-area-context', () => ({
 }));
 
 const mockImportSongs = jest.fn();
+const mockSyncContext = {
+  config: null,
+  webDavPassword: '',
+  isReady: true,
+  isConfigured: false,
+  status: { state: 'idle' },
+  saveConfiguration: jest.fn(),
+  syncNow: jest.fn(),
+  disconnect: jest.fn(),
+};
 
 jest.mock('@/utils/apiKeyStorage', () => ({
   getGeminiApiKey: jest.fn(() => Promise.resolve(null)),
@@ -52,6 +62,10 @@ jest.mock('@/context/SongsContext', () => ({
   }),
 }));
 
+jest.mock('@/context/SyncContext', () => ({
+  useSync: () => mockSyncContext,
+}));
+
 function renderSettings() {
   return render(
     <SettingsProvider>
@@ -65,6 +79,8 @@ const flattenStyle = (style: any) => Object.assign({}, ...(Array.isArray(style) 
 describe('SettingsScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSyncContext.webDavPassword = '';
+    mockSyncContext.isConfigured = false;
   });
 
   it('shows help and chord syntax sections', async () => {
@@ -80,11 +96,13 @@ describe('SettingsScreen', () => {
     expect(getByText('Import Song(s)')).toBeTruthy();
   });
 
-  it('keeps the Gemini API key visible and saves it when the field loses focus', async () => {
+  it('hides the Gemini API key by default, can reveal it, and saves it when the field loses focus', async () => {
     const { getByTestId } = await renderSettings();
     const input = getByTestId('gemini-api-key-input');
 
-    expect(input.props.secureTextEntry).not.toBe(true);
+    expect(input.props.secureTextEntry).toBe(true);
+    await fireEvent.press(getByTestId('gemini-api-key-input-visibility-toggle'));
+    expect(getByTestId('gemini-api-key-input').props.secureTextEntry).toBe(false);
     fireEvent.changeText(input, 'visible-key');
     await waitFor(() => expect(getByTestId('gemini-api-key-input').props.value).toBe('visible-key'));
     await act(async () => {
@@ -95,6 +113,37 @@ describe('SettingsScreen', () => {
     await waitFor(() => {
       expect(apiKeyStorage.saveGeminiApiKey).toHaveBeenCalledWith('visible-key');
     });
+  });
+
+  it('hides the WebDAV app password by default and can reveal it', async () => {
+    const { getByTestId } = await renderSettings();
+
+    expect(getByTestId('webdav-password-input').props.secureTextEntry).toBe(true);
+    await fireEvent.press(getByTestId('webdav-password-input-visibility-toggle'));
+    expect(getByTestId('webdav-password-input').props.secureTextEntry).toBe(false);
+  });
+
+  it('renders a stored WebDAV app password as masked text', async () => {
+    mockSyncContext.webDavPassword = 'nextcloud-app-password';
+    const { getByTestId } = await renderSettings();
+
+    expect(getByTestId('webdav-password-input').props.value).toBe('nextcloud-app-password');
+    expect(getByTestId('webdav-password-input').props.secureTextEntry).toBe(true);
+  });
+
+  it('requires confirmation before disconnecting WebDAV', async () => {
+    mockSyncContext.isConfigured = true;
+    const { getByTestId, getByText, queryByTestId } = await renderSettings();
+
+    await fireEvent.press(getByTestId('disconnect-webdav'));
+    expect(getByText('Disconnect WebDAV?')).toBeTruthy();
+    await fireEvent.press(getByTestId('disconnect-confirm-cancel'));
+    expect(mockSyncContext.disconnect).not.toHaveBeenCalled();
+    expect(queryByTestId('disconnect-confirm')).toBeNull();
+
+    await fireEvent.press(getByTestId('disconnect-webdav'));
+    await fireEvent.press(getByTestId('disconnect-confirm'));
+    expect(mockSyncContext.disconnect).toHaveBeenCalledTimes(1);
   });
 
   it('opens export options from the library export setting', async () => {

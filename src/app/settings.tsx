@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { AppState, View, Text, TouchableOpacity, ScrollView, Switch, StyleSheet, Modal, Platform, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { SymbolView } from 'expo-symbols';
 import { useTranslation } from '@/i18n';
 import { useSettings, CHORD_COLORS } from '@/context/SettingsContext';
 import { useSongs } from '@/context/SongsContext';
+import { useSync } from '@/context/SyncContext';
 import BottomNav from '@/components/BottomNav';
 import ExportOptionsModal from '@/components/ExportOptionsModal';
 import { exportLibrary, triggerFileImport } from '@/utils/dataUtils';
@@ -191,9 +193,109 @@ function InfoModal({
   );
 }
 
+function ConfirmationModal({
+  visible,
+  title,
+  message,
+  cancelLabel,
+  confirmLabel,
+  onCancel,
+  onConfirm,
+  theme,
+}: {
+  visible: boolean;
+  title: string;
+  message: string;
+  cancelLabel: string;
+  confirmLabel: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+  theme: { background: string; border: string; textPrimary: string; textSecondary: string };
+}) {
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
+      <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={onCancel}>
+        <TouchableOpacity activeOpacity={1} style={[styles.confirmationSheet, { backgroundColor: theme.background, borderColor: theme.border }]}>
+          <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>{title}</Text>
+          <Text style={[styles.confirmationMessage, { color: theme.textSecondary }]}>{message}</Text>
+          <View style={styles.confirmationActions}>
+            <TouchableOpacity testID="disconnect-confirm-cancel" style={[styles.confirmationButton, { borderColor: theme.border }]} onPress={onCancel}>
+              <Text style={[styles.aiButtonText, { color: theme.textPrimary }]}>{cancelLabel}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity testID="disconnect-confirm" style={[styles.confirmationButton, { borderColor: '#C62828' }]} onPress={onConfirm}>
+              <Text style={[styles.aiButtonText, { color: '#C62828' }]}>{confirmLabel}</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
+    </Modal>
+  );
+}
+
+interface SecretInputProps {
+  testID: string;
+  value: string;
+  onChangeText: (value: string) => void;
+  placeholder: string;
+  isVisible: boolean;
+  onToggleVisibility: () => void;
+  onBlur?: () => void;
+  theme: { textPrimary: string; textSecondary: string; border: string };
+  showLabel: string;
+  hideLabel: string;
+}
+
+function SecretInput({
+  testID,
+  value,
+  onChangeText,
+  placeholder,
+  isVisible,
+  onToggleVisibility,
+  onBlur,
+  theme,
+  showLabel,
+  hideLabel,
+}: SecretInputProps) {
+  return (
+    <View style={[styles.secretInputContainer, { borderColor: theme.border }]}>
+      <TextInput
+        testID={testID}
+        value={value}
+        onChangeText={onChangeText}
+        onBlur={onBlur}
+        placeholder={placeholder}
+        placeholderTextColor={theme.textSecondary}
+        autoCapitalize="none"
+        autoCorrect={false}
+        secureTextEntry={!isVisible}
+        style={[styles.secretInput, { color: theme.textPrimary }]}
+      />
+      <TouchableOpacity
+        testID={`${testID}-visibility-toggle`}
+        accessibilityRole="button"
+        accessibilityLabel={isVisible ? hideLabel : showLabel}
+        onPress={onToggleVisibility}
+        style={styles.secretVisibilityButton}
+      >
+        <SymbolView
+          name={{
+            ios: isVisible ? 'eye.slash' : 'eye',
+            android: isVisible ? 'visibility_off' : 'visibility',
+            web: isVisible ? 'visibility_off' : 'visibility',
+          }}
+          size={20}
+          tintColor={theme.textSecondary}
+        />
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 export default function SettingsScreenRoute() {
   const { theme, settings, updateSetting } = useSettings();
   const { songs, importSongs } = useSongs();
+  const { config: syncConfig, webDavPassword: storedWebDavPassword, isReady: isSyncReady, isConfigured, status: syncStatus, saveConfiguration, syncNow, disconnect } = useSync();
   const { t } = useTranslation();
 
   const chordColorOptions = (Object.keys(CHORD_COLORS) as ChordColorName[]).map((name) => ({
@@ -208,6 +310,12 @@ export default function SettingsScreenRoute() {
   const [showExportOptions, setShowExportOptions] = useState(false);
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [isImportingDocument, setIsImportingDocument] = useState(false);
+  const [webDavUrl, setWebDavUrl] = useState('');
+  const [webDavUsername, setWebDavUsername] = useState('');
+  const [webDavPassword, setWebDavPassword] = useState('');
+  const [isGeminiApiKeyVisible, setIsGeminiApiKeyVisible] = useState(false);
+  const [isWebDavPasswordVisible, setIsWebDavPasswordVisible] = useState(false);
+  const [showDisconnectConfirmation, setShowDisconnectConfirmation] = useState(false);
 
   React.useEffect(() => {
     getGeminiApiKey()
@@ -222,6 +330,11 @@ export default function SettingsScreenRoute() {
 
   const handleExport = () => {
     setShowExportOptions(true);
+  };
+
+  const handleSaveWebDav = async () => {
+    await saveConfiguration(webDavUrl || syncConfig?.url || '', webDavUsername || syncConfig?.username || '', webDavPassword);
+    setWebDavPassword('');
   };
 
   const handleExportMethod = (method: ExportMethod) => {
@@ -360,20 +473,94 @@ export default function SettingsScreenRoute() {
           <SettingRow icon="📥" label={t('settings.importSongs')} onPress={handleImport} theme={theme} />
         </SettingSection>
 
+        <SettingSection title={t('settings.syncTitle')} theme={theme}>
+          <View style={[styles.aiCard, { borderBottomColor: theme.border }]}>
+            <Text style={[styles.aiLabel, { color: theme.textPrimary }]}>{t('settings.webDavUrl')}</Text>
+            <Text style={[styles.aiDescription, { color: theme.textSecondary }]}>{t('settings.webDavDescription')}</Text>
+            <TextInput
+              testID="webdav-url-input"
+              value={webDavUrl || syncConfig?.url || ''}
+              onChangeText={setWebDavUrl}
+              placeholder={t('settings.webDavUrlPlaceholder')}
+              placeholderTextColor={theme.textSecondary}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="url"
+              style={[styles.apiKeyInput, { color: theme.textPrimary, borderColor: theme.border }]}
+            />
+            <Text style={[styles.aiLabel, styles.webDavLabel, { color: theme.textPrimary }]}>{t('settings.webDavUsername')}</Text>
+            <TextInput
+              testID="webdav-username-input"
+              value={webDavUsername || syncConfig?.username || ''}
+              onChangeText={setWebDavUsername}
+              placeholder={t('settings.webDavUsernamePlaceholder')}
+              placeholderTextColor={theme.textSecondary}
+              autoCapitalize="none"
+              autoCorrect={false}
+              style={[styles.apiKeyInput, { color: theme.textPrimary, borderColor: theme.border }]}
+            />
+            <Text style={[styles.aiLabel, styles.webDavLabel, { color: theme.textPrimary }]}>{t('settings.webDavPassword')}</Text>
+            <SecretInput
+              testID="webdav-password-input"
+              value={webDavPassword || storedWebDavPassword}
+              onChangeText={setWebDavPassword}
+              placeholder={t('settings.webDavPasswordPlaceholder')}
+              isVisible={isWebDavPasswordVisible}
+              onToggleVisibility={() => setIsWebDavPasswordVisible((visible) => !visible)}
+              theme={theme}
+              showLabel={t('common.showSecret')}
+              hideLabel={t('common.hideSecret')}
+            />
+            <TouchableOpacity
+              testID="save-webdav-settings"
+              style={[styles.aiButton, { borderColor: theme.primary }]}
+              onPress={handleSaveWebDav}
+              disabled={!isSyncReady || syncStatus.state === 'syncing'}
+            >
+              <Text style={[styles.aiButtonText, { color: theme.primary }]}>{t('settings.saveSync')}</Text>
+            </TouchableOpacity>
+            {isConfigured && (
+              <View style={styles.syncActions}>
+                <TouchableOpacity
+                  testID="sync-now"
+                  style={[styles.aiButton, styles.syncActionButton, { borderColor: theme.primary }]}
+                  onPress={() => void syncNow()}
+                  disabled={syncStatus.state === 'syncing'}
+                >
+                  <Text style={[styles.aiButtonText, { color: theme.primary }]}>{t('settings.syncNow')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  testID="disconnect-webdav"
+                  style={[styles.aiButton, styles.syncActionButton, { borderColor: '#C62828' }]}
+                  onPress={() => setShowDisconnectConfirmation(true)}
+                >
+                  <Text style={[styles.aiButtonText, { color: '#C62828' }]}>{t('settings.disconnectSync')}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {syncStatus.state !== 'idle' && (
+              <Text style={[styles.aiDescription, styles.syncStatus, { color: syncStatus.state === 'error' ? '#C62828' : theme.textSecondary }]}>
+                {syncStatus.state === 'syncing' ? t('settings.syncing') : syncStatus.state === 'success' ? t('settings.syncComplete') : syncStatus.message}
+              </Text>
+            )}
+          </View>
+        </SettingSection>
+
         <SettingSection title={t('settings.aiImport')} theme={theme}>
           <View style={[styles.aiCard, { borderBottomColor: theme.border }]}>
             <Text style={[styles.aiLabel, { color: theme.textPrimary }]}>{t('settings.geminiApiKey')}</Text>
             <Text style={[styles.aiDescription, { color: theme.textSecondary }]}>{t('settings.geminiApiKeyDescription')}</Text>
-            <TextInput
+            <SecretInput
               testID="gemini-api-key-input"
               value={geminiApiKey}
               onChangeText={setGeminiApiKey}
               onBlur={handleSaveGeminiApiKey}
               placeholder={t('settings.geminiApiKeyPlaceholder')}
-              placeholderTextColor={theme.textSecondary}
-              autoCapitalize="none"
-              autoCorrect={false}
-              style={[styles.apiKeyInput, { color: theme.textPrimary, borderColor: theme.border }]}
+              isVisible={isGeminiApiKeyVisible}
+              onToggleVisibility={() => setIsGeminiApiKeyVisible((visible) => !visible)}
+              theme={theme}
+              showLabel={t('common.showSecret')}
+              hideLabel={t('common.hideSecret')}
             />
             <TouchableOpacity
               testID="save-gemini-api-key"
@@ -456,6 +643,20 @@ export default function SettingsScreenRoute() {
         </View>
       </Modal>
 
+      <ConfirmationModal
+        visible={showDisconnectConfirmation}
+        title={t('settings.disconnectSyncTitle')}
+        message={t('settings.disconnectSyncDescription')}
+        cancelLabel={t('common.cancel')}
+        confirmLabel={t('settings.disconnectSync')}
+        onCancel={() => setShowDisconnectConfirmation(false)}
+        onConfirm={() => {
+          setShowDisconnectConfirmation(false);
+          void disconnect();
+        }}
+        theme={theme}
+      />
+
       {/* Info Modals */}
       <InfoModal
         visible={activeInfo === 'usage'}
@@ -513,14 +714,25 @@ const styles = StyleSheet.create({
   infoMessage: { fontSize: 14, lineHeight: 22 },
   infoCloseButton: { paddingVertical: 10, borderRadius: 8, alignItems: 'center', marginTop: 12 },
   infoCloseText: { color: '#ffffff', fontWeight: '700', fontSize: 14 },
+  confirmationSheet: { width: '85%', maxWidth: 420, borderRadius: 16, borderWidth: 1, padding: 20 },
+  confirmationMessage: { fontSize: 14, lineHeight: 21 },
+  confirmationActions: { flexDirection: 'row', gap: 10, marginTop: 20 },
+  confirmationButton: { flex: 1, alignItems: 'center', borderWidth: 1, borderRadius: 8, paddingVertical: 10 },
   footer: { marginTop: 32, alignItems: 'center' },
   footerText: { fontSize: 12 },
   aiCard: { padding: 16, borderBottomWidth: StyleSheet.hairlineWidth },
   aiLabel: { fontSize: 15, fontWeight: '600', marginBottom: 4 },
   aiDescription: { fontSize: 12, lineHeight: 18, marginBottom: 12 },
   apiKeyInput: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 9, fontSize: 14 },
+  secretInputContainer: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 8 },
+  secretInput: { flex: 1, paddingHorizontal: 10, paddingVertical: 9, fontSize: 14 },
+  secretVisibilityButton: { padding: 10 },
   aiButton: { alignSelf: 'flex-start', borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, marginTop: 10 },
   aiButtonText: { fontSize: 13, fontWeight: '700' },
+  webDavLabel: { marginTop: 12 },
+  syncActions: { flexDirection: 'row', gap: 10 },
+  syncActionButton: { flex: 1 },
+  syncStatus: { marginTop: 12, marginBottom: 0 },
   documentImportRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
   loadingOverlay: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.62)', padding: 24 },
   loadingCard: { width: '100%', maxWidth: 320, borderRadius: 16, borderWidth: 1, alignItems: 'center', padding: 24 },

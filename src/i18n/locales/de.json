@@ -46,7 +46,23 @@
     "documentImportLoadingDescription": "Lass Repertoire geöffnet, während das Dokument umgewandelt wird.",
     "openWithApiKeyRequired": "Gib in den Einstellungen einen Gemini-API-Schlüssel ein und speichere ihn, bevor du ein PDF oder DOCX öffnest.",
     "noSongReturned": "Gemini hat keinen Song zurückgegeben.",
-    "noSongsInFile": "Keine Songs in der ausgewählten Datei gefunden."
+    "noSongsInFile": "Keine Songs in der ausgewählten Datei gefunden.",
+    "syncTitle": "WEBDAV-SYNCHRONISIERUNG",
+    "webDavUrl": "WebDAV-Ordner-URL",
+    "webDavDescription": "Synchronisiert digirep-sync-v1.json per HTTPS mit einem App-Passwort.",
+    "webDavUrlPlaceholder": "https://cloud.example.com/remote.php/dav/files/name/digirep/",
+    "webDavUsername": "Benutzername",
+    "webDavUsernamePlaceholder": "WebDAV-Benutzername",
+    "webDavPassword": "App-Passwort",
+    "webDavPasswordPlaceholder": "WebDAV-App-Passwort",
+    "webDavPasswordSaved": "Sicher auf diesem Gerät gespeichert",
+    "saveSync": "Speichern und synchronisieren",
+    "syncNow": "Jetzt synchronisieren",
+    "disconnectSync": "Trennen",
+    "syncing": "Synchronisierung...",
+    "syncComplete": "Synchronisiert.",
+    "disconnectSyncTitle": "WebDAV trennen?",
+    "disconnectSyncDescription": "Die Synchronisierung wird nur auf diesem Gerät beendet. Lokale Songs und die WebDAV-Sync-Datei bleiben erhalten."
   },
   "help": {
     "app": "1) Bibliothek: durchsuchen, suchen, filtern und Songs als Favoriten markieren.\n2) + Button: einen neuen Song erstellen.\n3) Bearbeitungsmodus: Rohes ChordPro-Text eingeben und Speichern drücken.\n4) Ansichtsmodus: Transposition und pro-Song Schriftgrößensteuerung verwenden.\n5) Einstellungen: Akkordfarbe, automatische Speicherung und Diagramme anpassen.",
@@ -60,7 +76,9 @@
     "shareChordPro": "ChordPro teilen",
     "savePdf": "PDF speichern",
     "saveWord": "Word speichern",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "showSecret": "Geheimnis anzeigen",
+    "hideSecret": "Geheimnis ausblenden"
   },
   "nav": {
     "library": "Bibliothek",

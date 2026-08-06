@@ -2,6 +2,7 @@ import React from 'react';
 import renderer, { act } from 'react-test-renderer';
 import { SettingsProvider } from '@/context/SettingsContext';
 import { SongsProvider } from '@/context/SongsContext';
+import { SyncProvider } from '@/context/SyncContext';
 import LibraryScreenRoute from '../index';
 import SettingsScreenRoute from '../settings';
 import ViewerScreenRoute from '../viewer';
@@ -25,8 +26,16 @@ jest.mock('expo-router', () => ({
 }));
 
 describe('Phase 6 Routes & Screens', () => {
+  let tree: renderer.ReactTestRenderer | null = null;
+
+  afterEach(() => {
+    act(() => {
+      tree?.unmount();
+    });
+    tree = null;
+  });
+
   it('renders LibraryScreenRoute (index.tsx)', async () => {
-    let tree: renderer.ReactTestRenderer = null!;
     await act(async () => {
       tree = renderer.create(
         <SettingsProvider>
@@ -36,11 +45,10 @@ describe('Phase 6 Routes & Screens', () => {
         </SettingsProvider>
       );
     });
-    expect(tree.root.findByType(LibraryScreenRoute)).toBeTruthy();
+    expect(tree!.root.findByType(LibraryScreenRoute)).toBeTruthy();
   });
 
   it('renders ViewerScreenRoute (viewer.tsx)', async () => {
-    let tree: renderer.ReactTestRenderer = null!;
     await act(async () => {
       tree = renderer.create(
         <SettingsProvider>
@@ -50,11 +58,10 @@ describe('Phase 6 Routes & Screens', () => {
         </SettingsProvider>
       );
     });
-    expect(tree.root.findByType(ViewerScreenRoute)).toBeTruthy();
+    expect(tree!.root.findByType(ViewerScreenRoute)).toBeTruthy();
   });
 
   it('renders EditorScreenRoute (editor.tsx)', async () => {
-    let tree: renderer.ReactTestRenderer = null!;
     await act(async () => {
       tree = renderer.create(
         <SettingsProvider>
@@ -64,20 +71,21 @@ describe('Phase 6 Routes & Screens', () => {
         </SettingsProvider>
       );
     });
-    expect(tree.root.findByType(EditorScreenRoute)).toBeTruthy();
+    expect(tree!.root.findByType(EditorScreenRoute)).toBeTruthy();
   });
 
   it('renders SettingsScreenRoute (settings.tsx)', async () => {
-    let tree: renderer.ReactTestRenderer = null!;
     await act(async () => {
       tree = renderer.create(
         <SettingsProvider>
           <SongsProvider>
-            <SettingsScreenRoute />
+            <SyncProvider>
+              <SettingsScreenRoute />
+            </SyncProvider>
           </SongsProvider>
         </SettingsProvider>
       );
     });
-    expect(tree.root.findByType(SettingsScreenRoute)).toBeTruthy();
+    expect(tree!.root.findByType(SettingsScreenRoute)).toBeTruthy();
   });
 });

@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { Platform } from 'react-native';
 import { Song } from '@/types/song';
+import { SyncLibrary } from '@/types/sync';
 import { INITIAL_SONGS } from '@/constants/initialSongs';
-import { getInitialSongs, loadSongs, persistSongs } from '@/utils/songStorage';
-import { upsertSong } from '@/utils/songState';
+import { loadSyncLibrary, persistSyncLibrary } from '@/utils/syncStorage';
+import { activeSongs, deleteSongFromLibrary, importSongsToLibrary, saveSongToLibrary, toggleFavoriteInLibrary } from '@/utils/syncLibrary';
 import { getSongFontScale } from '@/utils/fontScale';
 
 export interface SongsContextValue {
@@ -15,26 +15,21 @@ export interface SongsContextValue {
   toggleFavorite: (id: string) => void;
   importSongs: (imported: Song[]) => void;
   getSongById: (id: string) => Song | undefined;
+  syncLibrary: SyncLibrary | null;
+  replaceSyncLibrary: (library: SyncLibrary) => void;
 }
 
 export const SongsContext = createContext<SongsContextValue | undefined>(undefined);
 
 export function SongsProvider({ children }: { children: React.ReactNode }) {
-  const [songs, setSongs] = useState<Song[]>(() => getInitialSongs(INITIAL_SONGS));
-  const [hasHydrated, setHasHydrated] = useState<boolean>(Platform.OS === 'web');
+  const [syncLibrary, setSyncLibrary] = useState<SyncLibrary | null>(null);
+  const [hasHydrated, setHasHydrated] = useState<boolean>(false);
 
   useEffect(() => {
-    if (Platform.OS === 'web') return;
     let isMounted = true;
-    loadSongs(INITIAL_SONGS)
+    loadSyncLibrary(INITIAL_SONGS)
       .then((loaded) => {
-        if (isMounted && loaded && loaded.length > 0) {
-          setSongs((prev) => {
-            const loadedIds = new Set(loaded.map((s) => s.id));
-            const extras = prev.filter((s) => !loadedIds.has(s.id));
-            return [...loaded, ...extras];
-          });
-        }
+        if (isMounted) setSyncLibrary(loaded);
       })
       .finally(() => {
         if (isMounted) setHasHydrated(true);
@@ -45,9 +40,11 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!hasHydrated) return;
-    persistSongs(songs);
-  }, [songs, hasHydrated]);
+    if (!hasHydrated || !syncLibrary) return;
+    persistSyncLibrary(syncLibrary);
+  }, [syncLibrary, hasHydrated]);
+
+  const songs = useMemo(() => (syncLibrary ? activeSongs(syncLibrary) : []), [syncLibrary]);
 
   const allTags = useMemo(() => {
     const set = new Set<string>();
@@ -58,20 +55,15 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
   }, [songs]);
 
   const saveSong = useCallback((songData: Partial<Song> & { id?: string }) => {
-    setSongs((prev) => {
-      const selected = songData.id ? prev.find((s) => s.id === songData.id) || songData : songData;
-      return upsertSong(prev, selected, songData);
-    });
+    setSyncLibrary((current) => current ? saveSongToLibrary(current, songData) : current);
   }, []);
 
   const deleteSong = useCallback((id: string) => {
-    setSongs((prev) => prev.filter((s) => s.id !== id));
+    setSyncLibrary((current) => current ? deleteSongFromLibrary(current, id) : current);
   }, []);
 
   const toggleFavorite = useCallback((id: string) => {
-    setSongs((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, isFavorite: !s.isFavorite } : s))
-    );
+    setSyncLibrary((current) => current ? toggleFavoriteInLibrary(current, id) : current);
   }, []);
 
   const importSongs = useCallback((imported: Song[]) => {
@@ -80,13 +72,17 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
       fontScale: getSongFontScale(song),
     }));
     if (normalized.length === 0) return;
-    setSongs((prev) => [...normalized, ...prev]);
+    setSyncLibrary((current) => current ? importSongsToLibrary(current, normalized) : current);
   }, []);
 
   const getSongById = useCallback(
     (id: string) => songs.find((s) => s.id === id),
     [songs]
   );
+
+  const replaceSyncLibrary = useCallback((library: SyncLibrary) => {
+    setSyncLibrary(library);
+  }, []);
 
   const value = useMemo<SongsContextValue>(
     () => ({
@@ -98,8 +94,10 @@ export function SongsProvider({ children }: { children: React.ReactNode }) {
       toggleFavorite,
       importSongs,
       getSongById,
+      syncLibrary,
+      replaceSyncLibrary,
     }),
-    [songs, hasHydrated, allTags, saveSong, deleteSong, toggleFavorite, importSongs, getSongById]
+    [songs, hasHydrated, allTags, saveSong, deleteSong, toggleFavorite, importSongs, getSongById, syncLibrary, replaceSyncLibrary]
   );
 
   return <SongsContext.Provider value={value}>{children}</SongsContext.Provider>;

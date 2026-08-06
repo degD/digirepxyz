@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import { Song } from '@/types';
 import { parseChordPro } from '@/utils/chordProParser';
+import { createSyncId } from '@/utils/syncLibrary';
 import { Document, HeadingLevel, PageBreak, Paragraph, Packer, TextRun } from 'docx';
 
 export interface StatusCallback {
@@ -400,7 +401,7 @@ export function parseImportedContent(content: string): Song[] {
       .trim();
 
     songs.push({
-      id: `${Date.now()}_${i}_${Math.random().toString(36).slice(2, 7)}`,
+      id: createSyncId('song'),
       title,
       artist: artist || undefined,
       originalKey: originalKey || undefined,

@@ -7,3 +7,4 @@ export * from './chord';
 export * from './settings';
 export * from './transposition';
 export * from './db';
+export * from './sync';

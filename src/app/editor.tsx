@@ -10,6 +10,7 @@ import ChordPicker from '@/components/ChordPicker';
 import { useSettings, FONT_SIZES } from '@/context/SettingsContext';
 import { useSongs } from '@/context/SongsContext';
 import { FONT_SCALE_STEP, MIN_FONT_SCALE, getSongFontScale } from '@/utils/fontScale';
+import { createSyncId } from '@/utils/syncLibrary';
 import { Song } from '@/types/song';
 
 function useUndoRedo(initialValue: string) {
@@ -64,7 +65,7 @@ export default function EditorScreenRoute() {
 
   const existingSong = useMemo(() => (id ? getSongById(id) : undefined), [id, getSongById]);
 
-  const [songId] = useState<string>(() => existingSong?.id || String(Date.now()) + '_' + Math.random().toString(36).slice(2, 7));
+  const [songId] = useState<string>(() => existingSong?.id || createSyncId('song'));
   const songIdRef = useRef<string>(songId);
 
   const [title, setTitle] = useState<string>(existingSong?.title || '');

@@ -46,7 +46,23 @@
     "documentImportLoadingDescription": "Mantenha o Repertoire aberto enquanto o documento é convertido.",
     "openWithApiKeyRequired": "Digite e salve uma chave de API do Gemini em Configurações antes de abrir um PDF ou DOCX.",
     "noSongReturned": "O Gemini não retornou nenhuma música.",
-    "noSongsInFile": "Nenhuma música encontrada no arquivo selecionado."
+    "noSongsInFile": "Nenhuma música encontrada no arquivo selecionado.",
+    "syncTitle": "SINCRONIZACAO WEBDAV",
+    "webDavUrl": "URL da pasta WebDAV",
+    "webDavDescription": "Sincroniza digirep-sync-v1.json via HTTPS com uma senha de aplicativo.",
+    "webDavUrlPlaceholder": "https://cloud.example.com/remote.php/dav/files/name/digirep/",
+    "webDavUsername": "Usuario",
+    "webDavUsernamePlaceholder": "Usuario WebDAV",
+    "webDavPassword": "Senha de aplicativo",
+    "webDavPasswordPlaceholder": "Senha do WebDAV",
+    "webDavPasswordSaved": "Salva com seguranca neste dispositivo",
+    "saveSync": "Salvar e sincronizar",
+    "syncNow": "Sincronizar agora",
+    "disconnectSync": "Desconectar",
+    "syncing": "Sincronizando...",
+    "syncComplete": "Sincronizado.",
+    "disconnectSyncTitle": "Desconectar WebDAV?",
+    "disconnectSyncDescription": "Isto interrompe a sincronização apenas neste dispositivo. As músicas locais e o arquivo WebDAV permanecerão."
   },
   "help": {
     "app": "1) Biblioteca: navegar, pesquisar, filtrar e favoritar músicas.\n2) Botão +: criar uma nova música.\n3) Modo de edição: digite texto ChordPro bruto e toque em Salvar.\n4) Modo de visualização: use transposição e controles de tamanho de fonte por música.\n5) Configurações: personalize a cor dos acordes, salvamento automático e diagramas.",
@@ -60,7 +76,9 @@
     "shareChordPro": "Partilhar ChordPro",
     "savePdf": "Guardar PDF",
     "saveWord": "Guardar Word",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "showSecret": "Mostrar segredo",
+    "hideSecret": "Ocultar segredo"
   },
   "nav": {
     "library": "Biblioteca",

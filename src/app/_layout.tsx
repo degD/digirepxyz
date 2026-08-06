@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SystemUI from 'expo-system-ui';
 import { SettingsProvider, useSettings } from '@/context/SettingsContext';
 import { SongsProvider, useSongs } from '@/context/SongsContext';
+import { SyncProvider } from '@/context/SyncContext';
 import { i18n } from '@/i18n';
 import { importSongsFromUri, logChordProImport } from '@/utils/dataUtils';
 
@@ -117,7 +118,9 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <SettingsProvider>
         <SongsProvider>
-          <AppLayoutInner />
+          <SyncProvider>
+            <AppLayoutInner />
+          </SyncProvider>
         </SongsProvider>
       </SettingsProvider>
     </SafeAreaProvider>

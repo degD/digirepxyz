@@ -46,7 +46,23 @@
     "documentImportLoadingDescription": "Keep Repertoire open while the document is converted.",
     "openWithApiKeyRequired": "Enter and save a Gemini API key in Settings before opening a PDF or DOCX file.",
     "noSongReturned": "No song was returned by Gemini.",
-    "noSongsInFile": "No songs found in the selected file."
+    "noSongsInFile": "No songs found in the selected file.",
+    "syncTitle": "WEBDAV SYNC",
+    "webDavUrl": "WebDAV folder URL",
+    "webDavDescription": "Syncs digirep-sync-v1.json. The WebDAV server can read this file; use an HTTPS URL and an app password.",
+    "webDavUrlPlaceholder": "https://cloud.example.com/remote.php/dav/files/name/digirep/",
+    "webDavUsername": "Username",
+    "webDavUsernamePlaceholder": "WebDAV username",
+    "webDavPassword": "App password",
+    "webDavPasswordPlaceholder": "WebDAV app password",
+    "webDavPasswordSaved": "Saved securely on this device",
+    "saveSync": "Save and sync",
+    "syncNow": "Sync now",
+    "disconnectSync": "Disconnect",
+    "syncing": "Synchronizing...",
+    "syncComplete": "Synchronized.",
+    "disconnectSyncTitle": "Disconnect WebDAV?",
+    "disconnectSyncDescription": "This stops sync on this device only. Your local songs and the WebDAV sync file will remain."
   },
   "help": {
     "app": "1) Library: browse, search, filter, and favorite songs.\n2) + button: create a new song.\n3) Edit mode: type raw ChordPro text and tap Save.\n4) View mode: use transpose and per-song font-size controls.\n5) Settings: customize chord color, autosave, and diagrams.",
@@ -60,7 +76,9 @@
     "shareChordPro": "Share ChordPro",
     "savePdf": "Save PDF",
     "saveWord": "Save Word",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "showSecret": "Show secret",
+    "hideSecret": "Hide secret"
   },
   "nav": {
     "library": "Library",
