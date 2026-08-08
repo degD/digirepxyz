@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AppState, View, Text, TouchableOpacity, ScrollView, Switch, StyleSheet, Modal, Platform, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SymbolView } from 'expo-symbols';
+import { Host, Slider } from '@expo/ui';
 import { useTranslation } from '@/i18n';
 import { useSettings, CHORD_COLORS } from '@/context/SettingsContext';
 import { useSongs } from '@/context/SongsContext';
@@ -12,7 +13,8 @@ import { exportLibrary, triggerFileImport } from '@/utils/dataUtils';
 import type { ExportMethod } from '@/utils/dataUtils';
 import { ChordColorName } from '@/types/settings';
 import { getGeminiApiKey, saveGeminiApiKey } from '@/utils/apiKeyStorage';
-import { importDocumentAsSong, pickDocumentForImport } from '@/utils/documentImport';
+import { importDocumentAsSong, importDocumentsAsSongs, pickDocumentDirectoryForImport, pickDocumentForImport } from '@/utils/documentImport';
+import type { BulkDocumentImportProgress } from '@/types/documentImport';
 
 const LANG_OPTIONS = [
   { code: 'en', label: 'English' },
@@ -27,6 +29,33 @@ const LANG_LABELS: Record<string, string> = LANG_OPTIONS.reduce(
   (acc, l) => ({ ...acc, [l.code]: l.label }),
   {}
 );
+
+function waitForActiveAppState(signal: AbortSignal): Promise<void> {
+  if (AppState.currentState !== 'background' && AppState.currentState !== 'inactive') return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    let appStateSubscription: { remove: () => void } | null = null;
+    const cleanup = () => {
+      appStateSubscription?.remove();
+      signal.removeEventListener('abort', abort);
+    };
+    const abort = () => {
+      cleanup();
+      reject(new Error('Document import interrupted.'));
+    };
+    appStateSubscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        cleanup();
+        resolve();
+      }
+    });
+    signal.addEventListener('abort', abort, { once: true });
+    if (AppState.currentState === 'active') {
+      cleanup();
+      resolve();
+    }
+  });
+}
 
 function SettingRow({
   icon,
@@ -310,12 +339,19 @@ export default function SettingsScreenRoute() {
   const [showExportOptions, setShowExportOptions] = useState(false);
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [isImportingDocument, setIsImportingDocument] = useState(false);
+  const [isImportingDocumentFolder, setIsImportingDocumentFolder] = useState(false);
+  const [documentFolderProgress, setDocumentFolderProgress] = useState<BulkDocumentImportProgress | null>(null);
   const [webDavUrl, setWebDavUrl] = useState('');
   const [webDavUsername, setWebDavUsername] = useState('');
   const [webDavPassword, setWebDavPassword] = useState('');
   const [isGeminiApiKeyVisible, setIsGeminiApiKeyVisible] = useState(false);
   const [isWebDavPasswordVisible, setIsWebDavPasswordVisible] = useState(false);
   const [showDisconnectConfirmation, setShowDisconnectConfirmation] = useState(false);
+  const documentFolderAbortControllerRef = React.useRef<AbortController | null>(null);
+
+  React.useEffect(() => () => {
+    documentFolderAbortControllerRef.current?.abort();
+  }, []);
 
   React.useEffect(() => {
     getGeminiApiKey()
@@ -405,6 +441,64 @@ export default function SettingsScreenRoute() {
     } finally {
       appStateSubscription?.remove();
       setIsImportingDocument(false);
+    }
+  };
+
+  const handleDocumentFolderImport = async () => {
+    console.log('[SettingsAIImport] Document folder import requested', { present: Boolean(geminiApiKey.trim()) });
+    if (!geminiApiKey.trim()) {
+      setStatusMessage(t('settings.apiKeyRequired'));
+      return;
+    }
+
+    setIsImportingDocumentFolder(true);
+    setDocumentFolderProgress(null);
+    setStatusMessage(t('settings.documentFolderImportInProgress'));
+    let abortController: AbortController | null = null;
+    let appStateSubscription: { remove: () => void } | null = null;
+    try {
+      const documents = await pickDocumentDirectoryForImport();
+      if (!documents) {
+        setStatusMessage(null);
+        return;
+      }
+      if (documents.length === 0) {
+        setStatusMessage(t('settings.documentFolderImportEmpty'));
+        return;
+      }
+
+      abortController = new AbortController();
+      documentFolderAbortControllerRef.current = abortController;
+      await waitForActiveAppState(abortController.signal);
+      appStateSubscription = AppState.addEventListener('change', (nextState) => {
+        if (nextState !== 'active') {
+          console.log('[SettingsAIImport] Interrupting document folder import because app left foreground', { nextState });
+          abortController?.abort();
+        }
+      });
+      const result = await importDocumentsAsSongs(
+        documents,
+        geminiApiKey,
+        setDocumentFolderProgress,
+        abortController.signal,
+        settings.aiImportConcurrency
+      );
+      if (result.interrupted) {
+        setStatusMessage(t('settings.documentImportInterrupted'));
+        return;
+      }
+      importSongs(result.songs);
+      setStatusMessage(t('settings.documentFolderImportComplete', { imported: result.songs.length, failed: result.failures.length }));
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const interrupted = abortController?.signal.aborted === true;
+      console.warn('[SettingsAIImport] Document folder import failed', { message, interrupted });
+      setStatusMessage(interrupted ? t('settings.documentImportInterrupted') : t('settings.documentImportFailed'));
+    } finally {
+      appStateSubscription?.remove();
+      if (documentFolderAbortControllerRef.current === abortController) documentFolderAbortControllerRef.current = null;
+      setIsImportingDocumentFolder(false);
+      setDocumentFolderProgress(null);
     }
   };
 
@@ -570,16 +664,46 @@ export default function SettingsScreenRoute() {
               <Text style={[styles.aiButtonText, { color: theme.primary }]}>{t('settings.saveApiKey')}</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            testID="import-document"
-            style={[styles.documentImportRow, { borderBottomColor: theme.border }]}
-            onPress={handleDocumentImport}
-            disabled={isImportingDocument}
-          >
-            <Text style={styles.settingIcon}>📄</Text>
-            <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>{t('settings.importDocument')}</Text>
-            {isImportingDocument ? <ActivityIndicator color={theme.primary} /> : <Text style={[styles.chevron, { color: theme.textSecondary }]}>›</Text>}
-          </TouchableOpacity>
+          <View style={[styles.aiCard, { borderBottomColor: theme.border }]}>
+            <View style={styles.aiImportConcurrencyHeader}>
+              <Text style={[styles.aiLabel, { color: theme.textPrimary }]}>{t('settings.aiImportConcurrency')}</Text>
+              <Text style={[styles.aiImportConcurrencyValue, { color: theme.primary }]}>{settings.aiImportConcurrency}</Text>
+            </View>
+            <Text style={[styles.aiDescription, { color: theme.textSecondary }]}>{t('settings.aiImportConcurrencyDescription')}</Text>
+            <Host style={styles.aiImportSliderHost}>
+              <Slider
+                testID="ai-import-concurrency"
+                value={settings.aiImportConcurrency}
+                min={1}
+                max={10}
+                step={1}
+                disabled={isImportingDocument || isImportingDocumentFolder}
+                onValueChange={(value) => updateSetting('aiImportConcurrency', Math.round(value))}
+              />
+            </Host>
+          </View>
+            <TouchableOpacity
+              testID="import-document"
+              style={[styles.documentImportRow, { borderBottomColor: theme.border }]}
+              onPress={handleDocumentImport}
+              disabled={isImportingDocument || isImportingDocumentFolder}
+            >
+              <Text style={styles.settingIcon}>📄</Text>
+              <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>{t('settings.importDocument')}</Text>
+              {isImportingDocument ? <ActivityIndicator color={theme.primary} /> : <Text style={[styles.chevron, { color: theme.textSecondary }]}>›</Text>}
+            </TouchableOpacity>
+            {Platform.OS !== 'web' && (
+              <TouchableOpacity
+                testID="import-document-folder"
+                style={[styles.documentImportRow, { borderBottomColor: theme.border }]}
+                onPress={handleDocumentFolderImport}
+                disabled={isImportingDocument || isImportingDocumentFolder}
+              >
+                <Text style={styles.settingIcon}>📁</Text>
+                <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>{t('settings.importDocumentFolder')}</Text>
+                {isImportingDocumentFolder ? <ActivityIndicator color={theme.primary} /> : <Text style={[styles.chevron, { color: theme.textSecondary }]}>›</Text>}
+              </TouchableOpacity>
+            )}
         </SettingSection>
 
         {/* Help & About */}
@@ -633,12 +757,25 @@ export default function SettingsScreenRoute() {
         theme={theme}
       />
 
-      <Modal visible={isImportingDocument} transparent animationType="fade" onRequestClose={() => {}}>
+      <Modal visible={isImportingDocument || isImportingDocumentFolder} transparent animationType="fade" onRequestClose={() => {}}>
         <View testID="document-import-loading-modal" style={styles.loadingOverlay}>
           <View style={[styles.loadingCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <ActivityIndicator size="large" color={theme.primary} />
-            <Text style={[styles.loadingTitle, { color: theme.textPrimary }]}>{t('settings.documentImportInProgress')}</Text>
-            <Text style={[styles.loadingDescription, { color: theme.textSecondary }]}>{t('settings.documentImportLoadingDescription')}</Text>
+            <Text style={[styles.loadingTitle, { color: theme.textPrimary }]}>
+              {isImportingDocumentFolder ? t('settings.documentFolderImportInProgress') : t('settings.documentImportInProgress')}
+            </Text>
+            {isImportingDocumentFolder && documentFolderProgress ? (
+              <>
+                <Text style={[styles.loadingDescription, { color: theme.textSecondary }]}>
+                  {documentFolderProgress.activeFiles.map((file) => file.name).join('\n')}
+                </Text>
+                <Text style={[styles.loadingDescription, { color: theme.textSecondary }]}>
+                  {t('settings.documentFolderImportRemaining', { count: documentFolderProgress.remaining })}
+                </Text>
+              </>
+            ) : (
+              <Text style={[styles.loadingDescription, { color: theme.textSecondary }]}>{t('settings.documentImportLoadingDescription')}</Text>
+            )}
           </View>
         </View>
       </Modal>
@@ -722,6 +859,9 @@ const styles = StyleSheet.create({
   footerText: { fontSize: 12 },
   aiCard: { padding: 16, borderBottomWidth: StyleSheet.hairlineWidth },
   aiLabel: { fontSize: 15, fontWeight: '600', marginBottom: 4 },
+  aiImportConcurrencyHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  aiImportConcurrencyValue: { fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  aiImportSliderHost: { width: '100%', height: 40 },
   aiDescription: { fontSize: 12, lineHeight: 18, marginBottom: 12 },
   apiKeyInput: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 9, fontSize: 14 },
   secretInputContainer: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 8 },

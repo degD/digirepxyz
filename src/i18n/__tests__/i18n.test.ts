@@ -1,4 +1,13 @@
-import { i18n } from '../index';
+import { i18n, resources } from '../index';
+
+function translationKeys(value: Record<string, unknown>, prefix = ''): string[] {
+  return Object.entries(value).flatMap(([key, child]) => {
+    const path = prefix ? `${prefix}.${key}` : key;
+    return typeof child === 'object' && child !== null
+      ? translationKeys(child as Record<string, unknown>, path)
+      : [path];
+  });
+}
 
 describe('i18n module', () => {
   beforeEach(() => {
@@ -52,5 +61,12 @@ describe('i18n module', () => {
 
   it('returns key if missing in all languages', () => {
     expect(i18n.t('nonexistent.key')).toBe('nonexistent.key');
+  });
+
+  it('keeps all locale keys aligned with English', () => {
+    const englishKeys = translationKeys(resources.en as Record<string, unknown>).sort();
+    Object.entries(resources).forEach(([language, translations]) => {
+      expect(translationKeys(translations as Record<string, unknown>).sort()).toEqual(englishKeys);
+    });
   });
 });

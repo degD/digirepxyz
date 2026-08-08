@@ -1,6 +1,7 @@
 import { strToU8, zipSync } from 'fflate';
 import * as DocumentPicker from 'expo-document-picker';
 import {
+  BULK_DOCUMENT_IMPORT_CONCURRENCY,
   DOCX_MIME_TYPE,
   DOCUMENT_IMPORT_INTERRUPTED_MESSAGE,
   DOCUMENT_IMPORT_MODEL,
@@ -9,6 +10,8 @@ import {
   detectSupportedDocumentType,
   extractDocxText,
   importDocumentAsSong,
+  importDocumentsAsSongs,
+  pickDocumentDirectoryForImport,
   pickDocumentForImport,
   songFromGeminiResponse,
 } from '../documentImport';
@@ -17,6 +20,28 @@ import type { PickedDocument } from '@/types/documentImport';
 jest.mock('expo-document-picker', () => ({
   getDocumentAsync: jest.fn(),
 }), { virtual: true });
+
+const mockPickDirectoryAsync = jest.fn();
+
+jest.mock('expo-file-system', () => {
+  class File {
+    readonly uri: string;
+    readonly name: string;
+    readonly size: number;
+    readonly type: string;
+
+    constructor(uri: string, name: string, size: number, type: string) {
+      this.uri = uri;
+      this.name = name;
+      this.size = size;
+      this.type = type;
+    }
+  }
+  return {
+    Directory: { pickDirectoryAsync: mockPickDirectoryAsync },
+    File,
+  };
+}, { virtual: true });
 
 function createDocxBytes(xml: string): Uint8Array {
   return zipSync({ 'word/document.xml': strToU8(xml) });
@@ -207,5 +232,127 @@ describe('documentImport', () => {
 
     picker.mockResolvedValueOnce({ canceled: true });
     await expect(pickDocumentForImport()).resolves.toBeNull();
+  });
+
+  it('picks only top-level PDF and DOCX files from a native folder in name order', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { File } = require('expo-file-system') as { File: new (uri: string, name: string, size: number, type: string) => unknown };
+    mockPickDirectoryAsync.mockResolvedValueOnce({
+      list: () => [
+        new File('file://z.pdf', 'z.pdf', 12, PDF_MIME_TYPE),
+        new File('file://notes.txt', 'notes.txt', 4, 'text/plain'),
+        new File('file://a.DOCX', 'a.DOCX', 8, DOCX_MIME_TYPE),
+        { uri: 'file://nested', name: 'nested' },
+      ],
+    });
+
+    await expect(pickDocumentDirectoryForImport()).resolves.toEqual([
+      { uri: 'file://a.DOCX', name: 'a.DOCX', mimeType: DOCX_MIME_TYPE, size: 8 },
+      { uri: 'file://z.pdf', name: 'z.pdf', mimeType: PDF_MIME_TYPE, size: 12 },
+    ]);
+  });
+
+  it('treats native folder-picker cancellation as a no-op', async () => {
+    mockPickDirectoryAsync.mockRejectedValueOnce(new Error('The file picker was cancelled by the user'));
+
+    await expect(pickDocumentDirectoryForImport()).resolves.toBeNull();
+  });
+
+  it('honors a configured bulk concurrency limit and preserves source order', async () => {
+    const concurrency = 2;
+    const pending: ((response: Response) => void)[] = [];
+    const fetchMock = jest.fn(() => new Promise<Response>((resolve) => pending.push(resolve)));
+    Object.defineProperty(globalThis, 'fetch', { configurable: true, value: fetchMock, writable: true });
+    const documents = Array.from({ length: concurrency + 1 }, (_, index) => ({
+      uri: `file://song-${index}.pdf`,
+      name: `song-${index}.pdf`,
+      size: 1,
+      file: { arrayBuffer: async () => new Uint8Array([1]).buffer as ArrayBuffer },
+    }));
+
+    const importing = importDocumentsAsSongs(documents, 'test-key', undefined, undefined, concurrency);
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    expect(fetchMock).toHaveBeenCalledTimes(concurrency);
+
+    pending.splice(0).forEach((resolve, index) => resolve({
+      ok: true,
+      json: async () => ({ candidates: [{ content: { parts: [{ text: `{"title":"Song ${index}","content":"[C]Hello"}` }] } }] }),
+    } as Response));
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    expect(fetchMock).toHaveBeenCalledTimes(concurrency + 1);
+    pending.splice(0).forEach((resolve) => resolve({
+      ok: true,
+      json: async () => ({ candidates: [{ content: { parts: [{ text: '{"title":"Song 2","content":"[C]Hello"}' }] } }] }),
+    } as Response));
+
+    await expect(importing).resolves.toMatchObject({
+      interrupted: false,
+      failures: [],
+      songs: [{ title: 'Song 0' }, { title: 'Song 1' }, { title: 'Song 2' }],
+    });
+  });
+
+  it('continues a bulk import after a permanent document failure', async () => {
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 400, text: async () => 'bad request', headers: { get: () => null } } as unknown as Response)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: '{"title":"Second","content":"[C]Hello"}' }] } }] }) } as Response);
+    Object.defineProperty(globalThis, 'fetch', { configurable: true, value: fetchMock, writable: true });
+    const documents: PickedDocument[] = ['first.pdf', 'second.pdf'].map((name) => ({
+      uri: `file://${name}`,
+      name,
+      size: 1,
+      file: { arrayBuffer: async () => new Uint8Array([1]).buffer as ArrayBuffer },
+    }));
+
+    await expect(importDocumentsAsSongs(documents, 'test-key')).resolves.toMatchObject({
+      interrupted: false,
+      failures: [{ sourceName: 'first.pdf' }],
+      songs: [{ title: 'Second' }],
+    });
+  });
+
+  it('retries a rate-limited document before completing the bulk import', async () => {
+    jest.useFakeTimers();
+    jest.spyOn(Math, 'random').mockReturnValue(0);
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 429, text: async () => 'slow down', headers: { get: () => null } } as unknown as Response)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: '{"title":"Retried","content":"[C]Hello"}' }] } }] }) } as Response);
+    Object.defineProperty(globalThis, 'fetch', { configurable: true, value: fetchMock, writable: true });
+    const document: PickedDocument = {
+      uri: 'file://retry.pdf',
+      name: 'retry.pdf',
+      size: 1,
+      file: { arrayBuffer: async () => new Uint8Array([1]).buffer as ArrayBuffer },
+    };
+
+    const importing = importDocumentsAsSongs([document], 'test-key');
+    await jest.advanceTimersByTimeAsync(1_000);
+
+    await expect(importing).resolves.toMatchObject({ songs: [{ title: 'Retried' }], failures: [] });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    jest.useRealTimers();
+  });
+
+  it('stops active and queued work on abort without returning staged songs', async () => {
+    const controller = new AbortController();
+    const fetchMock = jest.fn((_url: string, options?: RequestInit) => new Promise<Response>((_resolve, reject) => {
+      options?.signal?.addEventListener('abort', () => reject(new Error('request aborted')));
+    }));
+    Object.defineProperty(globalThis, 'fetch', { configurable: true, value: fetchMock, writable: true });
+    const documents = Array.from({ length: BULK_DOCUMENT_IMPORT_CONCURRENCY + 1 }, (_, index) => ({
+      uri: `file://abort-${index}.pdf`,
+      name: `abort-${index}.pdf`,
+      size: 1,
+      file: { arrayBuffer: async () => new Uint8Array([1]).buffer as ArrayBuffer },
+    }));
+
+    const importing = importDocumentsAsSongs(documents, 'test-key', undefined, controller.signal);
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    controller.abort();
+
+    await expect(importing).resolves.toEqual({ songs: [], failures: [], interrupted: true });
+    expect(fetchMock).toHaveBeenCalledTimes(BULK_DOCUMENT_IMPORT_CONCURRENCY);
   });
 });

@@ -15,6 +15,7 @@ export interface Settings {
   chordColorName: ChordColorName | string;
   autoSave: boolean;
   showChordDiagrams: boolean;
+  aiImportConcurrency: number;
   referencePitch: number;
   language: string;
 }

@@ -4,6 +4,7 @@ import {
   FONT_SIZES,
   buildTheme,
   defaultSettings,
+  normalizeAiImportConcurrency,
 } from '../SettingsContext';
 
 function loadSettingsContextForPlatform(os: 'android' | 'ios' | 'web', asyncStorageMock?: any) {
@@ -62,9 +63,20 @@ describe('SettingsContext utilities and defaults', () => {
       chordColorName: 'Blue',
       autoSave: true,
       showChordDiagrams: false,
+      aiImportConcurrency: 3,
       referencePitch: 440,
       language: 'en',
     });
+  });
+
+  it('normalizes persisted AI import concurrency to an integer from one through ten', () => {
+    expect(normalizeAiImportConcurrency(undefined)).toBe(3);
+    expect(normalizeAiImportConcurrency(0)).toBe(3);
+    expect(normalizeAiImportConcurrency(11)).toBe(3);
+    expect(normalizeAiImportConcurrency(2.5)).toBe(3);
+    expect(normalizeAiImportConcurrency('5')).toBe(3);
+    expect(normalizeAiImportConcurrency(1)).toBe(1);
+    expect(normalizeAiImportConcurrency(10)).toBe(10);
   });
 
   it('storage helper get/set operates correctly on web platform', async () => {

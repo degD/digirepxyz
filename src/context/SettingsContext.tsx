@@ -45,11 +45,20 @@ export const FONT_SIZES: Record<FontSizeCategory, FontSizeConfig> = {
   'Extra Large': { lyric: 24, chord: 20, editor: 22 },
 };
 
+export const DEFAULT_AI_IMPORT_CONCURRENCY = 3;
+
+export function normalizeAiImportConcurrency(value: unknown): number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 10
+    ? value
+    : DEFAULT_AI_IMPORT_CONCURRENCY;
+}
+
 export const defaultSettings: Settings = {
   darkMode: true,
   chordColorName: 'Blue',
   autoSave: true,
   showChordDiagrams: false,
+  aiImportConcurrency: DEFAULT_AI_IMPORT_CONCURRENCY,
   referencePitch: 440,
   language: 'en',
 };
@@ -105,7 +114,7 @@ function getInitialSettings(): Settings {
       if (raw) {
         const saved = JSON.parse(raw);
         if (saved.language) i18n.changeLanguage(saved.language);
-        return { ...defaultSettings, ...saved };
+        return { ...defaultSettings, ...saved, aiImportConcurrency: normalizeAiImportConcurrency(saved.aiImportConcurrency) };
       }
     }
   } catch {}
@@ -120,7 +129,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     storage.get().then((saved) => {
       if (saved) {
         if (saved.language) i18n.changeLanguage(saved.language);
-        setSettings((prev) => ({ ...prev, ...saved }));
+        setSettings((prev) => ({ ...prev, ...saved, aiImportConcurrency: normalizeAiImportConcurrency(saved.aiImportConcurrency) }));
       }
       setReady(true);
     });
@@ -131,7 +140,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       i18n.changeLanguage(value as string);
     }
     setSettings((prev) => {
-      const next = { ...prev, [key]: value };
+      const next = key === 'aiImportConcurrency'
+        ? { ...prev, aiImportConcurrency: normalizeAiImportConcurrency(value) }
+        : { ...prev, [key]: value };
       storage.set(next);
       return next;
     });

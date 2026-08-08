@@ -7,6 +7,11 @@ import SettingsScreenRoute from '../settings';
 import * as apiKeyStorage from '@/utils/apiKeyStorage';
 import * as documentImport from '@/utils/documentImport';
 
+jest.mock('@expo/ui', () => ({
+  Host: 'ExpoHost',
+  Slider: 'ExpoSlider',
+}));
+
 jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: ({ children }: any) => <>{children}</>,
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
@@ -38,6 +43,18 @@ jest.mock('@/utils/documentImport', () => ({
       song: { id: 'imported', title: 'Imported PDF Song', content: '[C]Hello' },
     })
   ),
+  pickDocumentDirectoryForImport: jest.fn(() => Promise.resolve([
+    { uri: 'file://first.pdf', name: 'first.pdf', size: 1 },
+    { uri: 'file://second.docx', name: 'second.docx', size: 1 },
+  ])),
+  importDocumentsAsSongs: jest.fn(() => Promise.resolve({
+    songs: [
+      { id: 'first', title: 'First imported song', content: '[C]First' },
+      { id: 'second', title: 'Second imported song', content: '[G]Second' },
+    ],
+    failures: [{ sourceName: 'failed.pdf' }],
+    interrupted: false,
+  })),
 }));
 
 jest.mock('expo-router', () => ({
@@ -268,5 +285,150 @@ describe('SettingsScreen', () => {
       expect(getByText('Could not import this document. Check your API key and internet connection, then try again.')).toBeTruthy();
     });
     expect(queryByText(/Gemini request failed/)).toBeNull();
+  });
+
+  it('imports a document folder in one final repertoire write', async () => {
+    const { getByTestId, getByText } = await renderSettings();
+    fireEvent.changeText(getByTestId('gemini-api-key-input'), 'test-key');
+    await waitFor(() => expect(getByTestId('gemini-api-key-input').props.value).toBe('test-key'));
+    const importCountBefore = mockImportSongs.mock.calls.length;
+
+    await act(async () => {
+      fireEvent.press(getByTestId('import-document-folder'));
+      await Promise.resolve();
+    });
+
+    expect(mockImportSongs.mock.calls).toHaveLength(importCountBefore + 1);
+    expect(mockImportSongs).toHaveBeenLastCalledWith([
+      expect.objectContaining({ title: 'First imported song' }),
+      expect.objectContaining({ title: 'Second imported song' }),
+    ]);
+    expect(getByText('2 imported. 1 failed.')).toBeTruthy();
+  });
+
+  it('uses the selected AI import concurrency for a folder batch', async () => {
+    Object.defineProperty(AppState, 'currentState', { configurable: true, value: 'active' });
+    const { getByTestId, getByText } = await renderSettings();
+    const slider = getByTestId('ai-import-concurrency');
+    expect(slider.props).toMatchObject({ value: 3, min: 1, max: 10, step: 1 });
+
+    await act(async () => {
+      slider.props.onValueChange(7);
+    });
+    expect(getByText('7')).toBeTruthy();
+
+    fireEvent.changeText(getByTestId('gemini-api-key-input'), 'test-key');
+    await waitFor(() => expect(getByTestId('gemini-api-key-input').props.value).toBe('test-key'));
+    await act(async () => {
+      fireEvent.press(getByTestId('import-document-folder'));
+      await Promise.resolve();
+    });
+
+    expect(documentImport.importDocumentsAsSongs).toHaveBeenLastCalledWith(
+      expect.any(Array),
+      'test-key',
+      expect.any(Function),
+      expect.any(AbortSignal),
+      7
+    );
+  });
+
+  it('shows active folder imports and the remaining file count', async () => {
+    let finishImport: ((value: { songs: { id: string; title: string; content: string }[]; failures: never[]; interrupted: boolean }) => void) | undefined;
+    (documentImport.importDocumentsAsSongs as jest.Mock).mockImplementationOnce(
+      (_documents, _apiKey, onProgress) => new Promise((resolve) => {
+        onProgress({
+          total: 2,
+          completed: 0,
+          remaining: 2,
+          imported: 0,
+          failed: 0,
+          activeFiles: [{ name: 'first.pdf', stage: 'sending' }],
+        });
+        finishImport = resolve;
+      })
+    );
+    const { getByTestId, getByText, queryByTestId } = await renderSettings();
+    fireEvent.changeText(getByTestId('gemini-api-key-input'), 'test-key');
+    await waitFor(() => expect(getByTestId('gemini-api-key-input').props.value).toBe('test-key'));
+    await act(async () => {
+      fireEvent.press(getByTestId('import-document-folder'));
+      await Promise.resolve();
+    });
+
+    await waitFor(() => expect(getByTestId('document-import-loading-modal')).toBeTruthy());
+    expect(getByText('first.pdf')).toBeTruthy();
+    expect(getByText('2 files remaining')).toBeTruthy();
+
+    await act(async () => {
+      finishImport?.({ songs: [], failures: [], interrupted: false });
+    });
+    await waitFor(() => expect(queryByTestId('document-import-loading-modal')).toBeNull());
+  });
+
+  it('waits for the folder picker to return active before starting, then interrupts on a later background event', async () => {
+    Object.defineProperty(AppState, 'currentState', { configurable: true, value: 'background' });
+    const appStateHandlers: ((state: AppStateStatus) => void)[] = [];
+    jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, listener) => {
+      appStateHandlers.push(listener);
+      return { remove: jest.fn() } as ReturnType<typeof AppState.addEventListener>;
+    });
+    (documentImport.importDocumentsAsSongs as jest.Mock).mockImplementationOnce(
+      (_documents, _apiKey, _onProgress, signal?: AbortSignal) => new Promise((resolve) => {
+        signal?.addEventListener('abort', () => resolve({ songs: [], failures: [], interrupted: true }));
+      })
+    );
+    const importCountBefore = mockImportSongs.mock.calls.length;
+    const { getByTestId, getByText } = await renderSettings();
+    fireEvent.changeText(getByTestId('gemini-api-key-input'), 'test-key');
+    await waitFor(() => expect(getByTestId('gemini-api-key-input').props.value).toBe('test-key'));
+    fireEvent.press(getByTestId('import-document-folder'));
+
+    await waitFor(() => expect(appStateHandlers).toHaveLength(1));
+    expect(documentImport.importDocumentsAsSongs).not.toHaveBeenCalled();
+
+    await act(async () => {
+      appStateHandlers[0]('active');
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(documentImport.importDocumentsAsSongs).toHaveBeenCalledTimes(1));
+
+    await act(async () => {
+      appStateHandlers[1]('background');
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    });
+
+    await waitFor(() => expect(getByText('Import interrupted. Please try again.')).toBeTruthy());
+    expect(mockImportSongs.mock.calls).toHaveLength(importCountBefore);
+  });
+
+  it('does not commit a document folder import when the app backgrounds', async () => {
+    Object.defineProperty(AppState, 'currentState', { configurable: true, value: 'active' });
+    let appStateHandler: ((state: AppStateStatus) => void) | undefined;
+    const remove = jest.fn();
+    jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, listener) => {
+      appStateHandler = listener;
+      return { remove } as ReturnType<typeof AppState.addEventListener>;
+    });
+    (documentImport.importDocumentsAsSongs as jest.Mock).mockImplementationOnce(
+      (_documents, _apiKey, _onProgress, signal?: AbortSignal) => new Promise((resolve) => {
+        signal?.addEventListener('abort', () => resolve({ songs: [], failures: [], interrupted: true }));
+      })
+    );
+    const importCountBefore = mockImportSongs.mock.calls.length;
+    const { getByTestId, getByText } = await renderSettings();
+    fireEvent.changeText(getByTestId('gemini-api-key-input'), 'test-key');
+    await waitFor(() => expect(getByTestId('gemini-api-key-input').props.value).toBe('test-key'));
+    fireEvent.press(getByTestId('import-document-folder'));
+    await waitFor(() => expect(appStateHandler).toBeDefined());
+
+    await act(async () => {
+      appStateHandler?.('background');
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    });
+
+    await waitFor(() => expect(getByText('Import interrupted. Please try again.')).toBeTruthy());
+    expect(mockImportSongs.mock.calls).toHaveLength(importCountBefore);
+    expect(remove).toHaveBeenCalled();
   });
 });

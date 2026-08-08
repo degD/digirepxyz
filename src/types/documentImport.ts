@@ -22,3 +22,29 @@ export interface DocumentImportResult {
 export type DocumentImportStage = 'reading' | 'extracting' | 'sending' | 'parsing';
 
 export type DocumentImportProgress = (stage: DocumentImportStage) => void;
+
+export interface BulkDocumentImportActiveFile {
+  name: string;
+  stage: DocumentImportStage;
+}
+
+export interface BulkDocumentImportProgress {
+  total: number;
+  completed: number;
+  remaining: number;
+  imported: number;
+  failed: number;
+  activeFiles: BulkDocumentImportActiveFile[];
+}
+
+export interface BulkDocumentImportFailure {
+  sourceName: string;
+}
+
+export interface BulkDocumentImportResult {
+  songs: Song[];
+  failures: BulkDocumentImportFailure[];
+  interrupted: boolean;
+}
+
+export type BulkDocumentImportProgressCallback = (progress: BulkDocumentImportProgress) => void;
