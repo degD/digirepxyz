@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Linking, Platform } from 'react-native';
+import { Alert, AppState, Linking, Platform } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -8,7 +8,31 @@ import { SettingsProvider, useSettings } from '@/context/SettingsContext';
 import { SongsProvider, useSongs } from '@/context/SongsContext';
 import { SyncProvider } from '@/context/SyncContext';
 import { i18n } from '@/i18n';
+import type { PickedDocument } from '@/types/documentImport';
+import { getGeminiApiKey } from '@/utils/apiKeyStorage';
 import { importSongsFromUri, logChordProImport } from '@/utils/dataUtils';
+import { detectSupportedDocumentType, importDocumentAsSong } from '@/utils/documentImport';
+
+function incomingImageDocument(uri: string): PickedDocument | null {
+  // expo-file-system resolves metadata for both file:// and Android content:// URIs.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { File } = require('expo-file-system') as {
+    File: new (uri: string) => { uri?: string; name?: string; size?: number; type?: string };
+  };
+  const file = new File(uri);
+  const document: PickedDocument = {
+    uri: file.uri || uri,
+    name: file.name || decodeURIComponent(uri.split(/[/?#]/).pop() || ''),
+    mimeType: file.type || undefined,
+    size: file.size,
+  };
+
+  try {
+    return detectSupportedDocumentType(document) === 'image' ? document : null;
+  } catch {
+    return null;
+  }
+}
 
 function AppLayoutInner() {
   const { theme, settings } = useSettings();
@@ -66,36 +90,78 @@ function AppLayoutInner() {
       return;
     }
 
-    processedUrls.current.add(incomingUrl);
     logChordProImport('Starting incoming import', { incomingUrl });
     let isCurrent = true;
+    let appStateSubscription: { remove: () => void } | null = null;
+    let abortController: AbortController | null = null;
 
-    importSongsFromUri(incomingUrl)
-      .then((songs) => {
-        if (!isCurrent) return;
-        if (songs.length === 0) {
-          logChordProImport('Import produced no songs', { incomingUrl });
-          Alert.alert(i18n.t('settings.importFailed'), i18n.t('settings.noSongsInFile'));
+    const importIncomingUri = async () => {
+      const imageDocument = incomingImageDocument(incomingUrl);
+      if (imageDocument) {
+        const apiKey = await getGeminiApiKey();
+        if (!apiKey?.trim()) {
+          Alert.alert(i18n.t('settings.importFailed'), i18n.t('settings.openWithApiKeyRequired'), [
+            { text: i18n.t('common.cancel'), style: 'cancel' },
+            { text: i18n.t('settings.title'), onPress: () => router.push('/settings') },
+          ]);
           return;
         }
 
-        importSongs(songs);
-        logChordProImport('Added songs to library', { incomingUrl, songCount: songs.length });
+        abortController = new AbortController();
+        appStateSubscription = AppState.addEventListener('change', (nextState) => {
+          if (nextState !== 'active') abortController?.abort();
+        });
+        const result = await importDocumentAsSong(imageDocument, apiKey, undefined, abortController.signal);
+        if (!isCurrent) return;
+
+        importSongs([result.song]);
+        processedUrls.current.add(incomingUrl);
+        logChordProImport('Added image song to library', { incomingUrl, title: result.song.title });
         router.replace('/');
         Alert.alert(
           i18n.t('settings.importComplete'),
-          i18n.t('settings.importedSuccess', { count: songs.length })
+          i18n.t('settings.importedSuccess', { count: 1 })
         );
-      })
+        return;
+      }
+
+      const songs = await importSongsFromUri(incomingUrl);
+      if (!isCurrent) return;
+      if (songs.length === 0) {
+        logChordProImport('Import produced no songs', { incomingUrl });
+        Alert.alert(i18n.t('settings.importFailed'), i18n.t('settings.noSongsInFile'));
+        return;
+      }
+
+      importSongs(songs);
+      processedUrls.current.add(incomingUrl);
+      logChordProImport('Added songs to library', { incomingUrl, songCount: songs.length });
+      router.replace('/');
+      Alert.alert(
+        i18n.t('settings.importComplete'),
+        i18n.t('settings.importedSuccess', { count: songs.length })
+      );
+    };
+
+    void importIncomingUri()
       .catch((error: unknown) => {
         if (!isCurrent) return;
         const message = error instanceof Error ? error.message : String(error);
         logChordProImport('Incoming import handler failed', { incomingUrl, message });
-        Alert.alert(i18n.t('settings.importFailed'), message);
+        Alert.alert(
+          i18n.t('settings.importFailed'),
+          abortController?.signal.aborted ? i18n.t('settings.documentImportInterrupted') : message
+        );
+      })
+      .finally(() => {
+        appStateSubscription?.remove();
+        if (isCurrent) setIncomingUrl((url) => url === incomingUrl ? null : url);
       });
 
     return () => {
       isCurrent = false;
+      abortController?.abort();
+      appStateSubscription?.remove();
     };
   }, [incomingUrl, importSongs, isHydrated, router]);
 

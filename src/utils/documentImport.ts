@@ -17,6 +17,11 @@ export const DOCUMENT_IMPORT_MODEL = 'gemini-3.5-flash-lite';
 export const MAX_DOCUMENT_BYTES = 50 * 1024 * 1024;
 export const PDF_MIME_TYPE = 'application/pdf';
 export const DOCX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+export const PNG_MIME_TYPE = 'image/png';
+export const JPEG_MIME_TYPE = 'image/jpeg';
+export const WEBP_MIME_TYPE = 'image/webp';
+export const HEIC_MIME_TYPE = 'image/heic';
+export const HEIF_MIME_TYPE = 'image/heif';
 export const DOCUMENT_IMPORT_TIMEOUT_MS = 60_000;
 export const DOCUMENT_IMPORT_INTERRUPTED_MESSAGE = 'Document import interrupted.';
 export const BULK_DOCUMENT_IMPORT_CONCURRENCY = 3;
@@ -76,7 +81,16 @@ function documentMimeType(name: string): string | undefined {
   const extension = getFileExtension(name);
   if (extension === 'pdf') return PDF_MIME_TYPE;
   if (extension === 'docx') return DOCX_MIME_TYPE;
+  if (extension === 'png') return PNG_MIME_TYPE;
+  if (extension === 'jpg' || extension === 'jpeg') return JPEG_MIME_TYPE;
+  if (extension === 'webp') return WEBP_MIME_TYPE;
+  if (extension === 'heic') return HEIC_MIME_TYPE;
+  if (extension === 'heif') return HEIF_MIME_TYPE;
   return undefined;
+}
+
+function isSupportedImageMimeType(mimeType: string): boolean {
+  return [PNG_MIME_TYPE, JPEG_MIME_TYPE, WEBP_MIME_TYPE, HEIC_MIME_TYPE, HEIF_MIME_TYPE].includes(mimeType);
 }
 
 function normalizeBulkDocumentImportConcurrency(value: number | undefined): number {
@@ -91,7 +105,16 @@ export function detectSupportedDocumentType(document: PickedDocument): Supported
 
   if (extension === 'pdf' || mimeType === PDF_MIME_TYPE) return 'pdf';
   if (extension === 'docx' || mimeType === DOCX_MIME_TYPE) return 'docx';
-  throw new Error('Unsupported document. Select a PDF or DOCX file.');
+  if (isSupportedImageMimeType(documentMimeType(document.name) || '') || isSupportedImageMimeType(mimeType)) return 'image';
+  throw new Error('Unsupported document. Select a PDF, DOCX, or image file.');
+}
+
+function imageMimeType(document: PickedDocument): string {
+  const mimeType = (document.mimeType || '').toLowerCase();
+  if (isSupportedImageMimeType(mimeType)) return mimeType;
+  const nameMimeType = documentMimeType(document.name);
+  if (nameMimeType && isSupportedImageMimeType(nameMimeType)) return nameMimeType;
+  throw new Error('Unsupported image type.');
 }
 
 function base64ToBytes(value: string): Uint8Array {
@@ -270,10 +293,10 @@ async function generateSong(
   externalSignal?: AbortSignal
 ): Promise<{ song: Song; warnings: string[] }> {
   const requestParts: Record<string, unknown>[] = [{ text: buildDocumentPrompt(document.name, sourceText) }];
-  if (type === 'pdf') {
+  if (type === 'pdf' || type === 'image') {
     requestParts.push({
       inline_data: {
-        mime_type: PDF_MIME_TYPE,
+        mime_type: type === 'pdf' ? PDF_MIME_TYPE : imageMimeType(document),
         data: bytesToBase64(bytes),
       },
     });
@@ -393,7 +416,7 @@ export async function pickDocumentForImport(): Promise<PickedDocument | null> {
   };
   logDocumentImport('Opening document picker');
   const result = await DocumentPicker.getDocumentAsync({
-    type: [PDF_MIME_TYPE, DOCX_MIME_TYPE],
+    type: [PDF_MIME_TYPE, DOCX_MIME_TYPE, PNG_MIME_TYPE, JPEG_MIME_TYPE, WEBP_MIME_TYPE, HEIC_MIME_TYPE, HEIF_MIME_TYPE],
     multiple: false,
     copyToCacheDirectory: true,
   });

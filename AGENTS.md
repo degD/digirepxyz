@@ -136,4 +136,4 @@ The feature to work on will be given by user.
 7. Searching the web for songs.
 8. (+) Easy "share song" button.
 9. (+) System tests.
-10. Importing from images.
+10. (+) Importing from images.

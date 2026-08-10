@@ -1,6 +1,6 @@
 import type { Song } from '@/types/song';
 
-export type SupportedDocumentType = 'pdf' | 'docx';
+export type SupportedDocumentType = 'pdf' | 'docx' | 'image';
 
 export interface PickedDocument {
   uri: string;

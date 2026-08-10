@@ -41,6 +41,18 @@
               "cho",
               "chordpro"
             ]
+          },
+          {
+            "CFBundleTypeName": "Song image",
+            "CFBundleTypeRole": "Viewer",
+            "LSHandlerRank": "Alternate",
+            "LSItemContentTypes": [
+              "public.png",
+              "public.jpeg",
+              "org.webmproject.webp",
+              "public.heic",
+              "public.heif"
+            ]
           }
         ]
       }
@@ -73,6 +85,56 @@
           ],
           "data": {
             "mimeType": "application/octet-stream"
+          }
+        },
+        {
+          "action": "VIEW",
+          "category": [
+            "DEFAULT",
+            "BROWSABLE"
+          ],
+          "data": {
+            "mimeType": "image/png"
+          }
+        },
+        {
+          "action": "VIEW",
+          "category": [
+            "DEFAULT",
+            "BROWSABLE"
+          ],
+          "data": {
+            "mimeType": "image/jpeg"
+          }
+        },
+        {
+          "action": "VIEW",
+          "category": [
+            "DEFAULT",
+            "BROWSABLE"
+          ],
+          "data": {
+            "mimeType": "image/webp"
+          }
+        },
+        {
+          "action": "VIEW",
+          "category": [
+            "DEFAULT",
+            "BROWSABLE"
+          ],
+          "data": {
+            "mimeType": "image/heic"
+          }
+        },
+        {
+          "action": "VIEW",
+          "category": [
+            "DEFAULT",
+            "BROWSABLE"
+          ],
+          "data": {
+            "mimeType": "image/heif"
           }
         }
       ]

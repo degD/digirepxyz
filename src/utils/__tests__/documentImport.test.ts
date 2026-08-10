@@ -5,7 +5,12 @@ import {
   DOCX_MIME_TYPE,
   DOCUMENT_IMPORT_INTERRUPTED_MESSAGE,
   DOCUMENT_IMPORT_MODEL,
+  HEIC_MIME_TYPE,
+  HEIF_MIME_TYPE,
+  JPEG_MIME_TYPE,
   PDF_MIME_TYPE,
+  PNG_MIME_TYPE,
+  WEBP_MIME_TYPE,
   buildDocumentPrompt,
   detectSupportedDocumentType,
   extractDocxText,
@@ -72,10 +77,17 @@ describe('documentImport', () => {
     );
   });
 
-  it('detects only PDF and DOCX documents', () => {
+  it('detects PDF, DOCX, and supported image documents', () => {
     expect(detectSupportedDocumentType({ uri: 'file://song', name: 'song.pdf' })).toBe('pdf');
     expect(detectSupportedDocumentType({ uri: 'file://song', name: 'song.docx' })).toBe('docx');
-    expect(() => detectSupportedDocumentType({ uri: 'file://song', name: 'song.doc' })).toThrow('PDF or DOCX');
+    expect(detectSupportedDocumentType({ uri: 'file://song', name: 'song.png' })).toBe('image');
+    expect(detectSupportedDocumentType({ uri: 'file://song', name: 'song.jpg' })).toBe('image');
+    expect(detectSupportedDocumentType({ uri: 'file://song', name: 'song.jpeg' })).toBe('image');
+    expect(detectSupportedDocumentType({ uri: 'file://song', name: 'song.webp' })).toBe('image');
+    expect(detectSupportedDocumentType({ uri: 'file://song', name: 'song.heic' })).toBe('image');
+    expect(detectSupportedDocumentType({ uri: 'file://song', name: 'song.heif' })).toBe('image');
+    expect(detectSupportedDocumentType({ uri: 'file://song', name: 'song', mimeType: HEIC_MIME_TYPE })).toBe('image');
+    expect(() => detectSupportedDocumentType({ uri: 'file://song', name: 'song.doc' })).toThrow('PDF, DOCX, or image');
   });
 
   it('builds a prompt that keeps a multi-page document as one song', () => {
@@ -140,6 +152,33 @@ describe('documentImport', () => {
         body: expect.stringContaining('application/pdf'),
       })
     );
+  });
+
+  it('imports an image by sending its bytes directly to Gemini', async () => {
+    const response = {
+      candidates: [{ content: { parts: [{ text: '{"title":"Image Song","content":"[C]Hello"}' }] } }],
+    };
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => response,
+    } as Response);
+    Object.defineProperty(globalThis, 'fetch', { configurable: true, value: fetchMock, writable: true });
+    const document: PickedDocument = {
+      uri: 'file://song.heic',
+      name: 'song.heic',
+      mimeType: HEIC_MIME_TYPE,
+      file: { arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer as ArrayBuffer },
+    };
+
+    const result = await importDocumentAsSong(document, 'test-key');
+    const request = JSON.parse(fetchMock.mock.calls[0][1]?.body as string) as {
+      contents: { parts: { inline_data?: { mime_type: string; data: string } }[] }[];
+    };
+
+    expect(result.song.title).toBe('Image Song');
+    expect(request.contents[0].parts).toContainEqual({
+      inline_data: { mime_type: HEIC_MIME_TYPE, data: 'AQID' },
+    });
   });
 
   it('imports DOCX text as one song without sending the ZIP bytes', async () => {
@@ -217,7 +256,7 @@ describe('documentImport', () => {
     await expect(importing).rejects.toThrow(DOCUMENT_IMPORT_INTERRUPTED_MESSAGE);
   });
 
-  it('picks one PDF or DOCX file and honors cancellation', async () => {
+  it('picks one PDF, DOCX, or image file and honors cancellation', async () => {
     const picker = DocumentPicker.getDocumentAsync as jest.Mock;
     picker.mockResolvedValueOnce({
       canceled: false,
@@ -225,7 +264,7 @@ describe('documentImport', () => {
     });
     await expect(pickDocumentForImport()).resolves.toEqual({ uri: 'file://song.pdf', name: 'song.pdf' });
     expect(picker).toHaveBeenLastCalledWith({
-      type: [PDF_MIME_TYPE, DOCX_MIME_TYPE],
+      type: [PDF_MIME_TYPE, DOCX_MIME_TYPE, PNG_MIME_TYPE, JPEG_MIME_TYPE, WEBP_MIME_TYPE, HEIC_MIME_TYPE, HEIF_MIME_TYPE],
       multiple: false,
       copyToCacheDirectory: true,
     });
@@ -234,7 +273,7 @@ describe('documentImport', () => {
     await expect(pickDocumentForImport()).resolves.toBeNull();
   });
 
-  it('picks only top-level PDF and DOCX files from a native folder in name order', async () => {
+  it('picks only top-level PDF, DOCX, and image files from a native folder in name order', async () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { File } = require('expo-file-system') as { File: new (uri: string, name: string, size: number, type: string) => unknown };
     mockPickDirectoryAsync.mockResolvedValueOnce({
@@ -242,12 +281,16 @@ describe('documentImport', () => {
         new File('file://z.pdf', 'z.pdf', 12, PDF_MIME_TYPE),
         new File('file://notes.txt', 'notes.txt', 4, 'text/plain'),
         new File('file://a.DOCX', 'a.DOCX', 8, DOCX_MIME_TYPE),
+        new File('file://b.JPG', 'b.JPG', 6, JPEG_MIME_TYPE),
+        new File('file://c.heif', 'c.heif', 9, HEIF_MIME_TYPE),
         { uri: 'file://nested', name: 'nested' },
       ],
     });
 
     await expect(pickDocumentDirectoryForImport()).resolves.toEqual([
       { uri: 'file://a.DOCX', name: 'a.DOCX', mimeType: DOCX_MIME_TYPE, size: 8 },
+      { uri: 'file://b.JPG', name: 'b.JPG', mimeType: JPEG_MIME_TYPE, size: 6 },
+      { uri: 'file://c.heif', name: 'c.heif', mimeType: HEIF_MIME_TYPE, size: 9 },
       { uri: 'file://z.pdf', name: 'z.pdf', mimeType: PDF_MIME_TYPE, size: 12 },
     ]);
   });
