@@ -1,0 +1,30 @@
+appId: com.anonymous.digirepxyz
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: song-row-1
+    timeout: 10000
+- tapOn:
+    id: library-filter-favorites
+- assertVisible:
+    id: song-row-2
+- assertVisible:
+    id: song-row-4
+- assertVisible:
+    id: song-row-7
+- assertNotVisible:
+    id: song-row-1
+- tapOn:
+    id: library-filter-tag:rock
+- assertVisible:
+    id: song-row-1
+- assertVisible:
+    id: song-row-3
+- assertNotVisible:
+    id: song-row-2
+- tapOn:
+    id: library-filter-all
+- assertVisible:
+    id: song-row-2

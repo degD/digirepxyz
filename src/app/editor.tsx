@@ -187,18 +187,18 @@ export default function EditorScreenRoute() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView testID="editor-screen" style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.border }]}>
-        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+        <TouchableOpacity testID="editor-back" onPress={handleBackPress} style={styles.backButton}>
           <Text style={[styles.backText, { color: theme.primary }]}>{t('editor.back')}</Text>
         </TouchableOpacity>
 
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={undo} disabled={!canUndo} style={[styles.undoRedoButton, !canUndo && styles.undoRedoDisabled]}>
+          <TouchableOpacity testID="editor-undo" onPress={undo} disabled={!canUndo} style={[styles.undoRedoButton, !canUndo && styles.undoRedoDisabled]}>
             <Text style={[styles.undoRedoText, { color: canUndo ? theme.primary : theme.textSecondary + '44' }]}>↶</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={redo} disabled={!canRedo} style={[styles.undoRedoButton, !canRedo && styles.undoRedoDisabled]}>
+          <TouchableOpacity testID="editor-redo" onPress={redo} disabled={!canRedo} style={[styles.undoRedoButton, !canRedo && styles.undoRedoDisabled]}>
             <Text style={[styles.undoRedoText, { color: canRedo ? theme.primary : theme.textSecondary + '44' }]}>↷</Text>
           </TouchableOpacity>
 
@@ -221,6 +221,7 @@ export default function EditorScreenRoute() {
           </View>
 
           <TouchableOpacity
+            testID="editor-chord-picker-toggle"
             style={[styles.chordModeButton, { borderColor: theme.primary }, showChordPicker && { backgroundColor: theme.primary }]}
             onPress={() => setShowChordPicker(!showChordPicker)}
           >
@@ -229,7 +230,7 @@ export default function EditorScreenRoute() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.primary }]} onPress={handleSave}>
+          <TouchableOpacity testID="editor-save" style={[styles.saveButton, { backgroundColor: theme.primary }]} onPress={handleSave}>
             <Text style={styles.saveText}>{t('editor.save')}</Text>
           </TouchableOpacity>
         </View>
@@ -238,6 +239,7 @@ export default function EditorScreenRoute() {
       {/* Meta Section */}
       <View style={[styles.metaSection, { borderBottomColor: theme.border }]}>
         <TextInput
+          testID="editor-title-input"
           style={[styles.titleInput, { color: theme.textPrimary }]}
           value={title}
           onChangeText={setTitle}
@@ -245,6 +247,7 @@ export default function EditorScreenRoute() {
           placeholderTextColor={theme.textSecondary}
         />
         <TextInput
+          testID="editor-artist-input"
           style={[styles.artistInput, { color: theme.textSecondary }]}
           value={artist}
           onChangeText={setArtist}
@@ -264,6 +267,7 @@ export default function EditorScreenRoute() {
           </View>
           <View style={styles.tagInputRow}>
             <TextInput
+              testID="editor-tag-input"
               style={[styles.tagInputField, { color: theme.textPrimary, borderColor: theme.border }]}
               value={tagInput}
               onChangeText={setTagInput}
@@ -273,7 +277,7 @@ export default function EditorScreenRoute() {
               returnKeyType="done"
             />
             {tagInput.trim() !== '' && (
-              <TouchableOpacity style={[styles.tagAddButton, { backgroundColor: theme.primary }]} onPress={handleAddTag}>
+              <TouchableOpacity testID="editor-tag-add" style={[styles.tagAddButton, { backgroundColor: theme.primary }]} onPress={handleAddTag}>
                 <Text style={styles.tagAddText}>+</Text>
               </TouchableOpacity>
             )}
@@ -304,6 +308,7 @@ export default function EditorScreenRoute() {
         <View style={styles.editorWrapper}>
           <TextInput
             ref={textInputRef}
+            testID="editor-content-input"
             style={[
               styles.editor,
               {

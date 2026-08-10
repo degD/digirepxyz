@@ -33,6 +33,7 @@ export default function SongItem({
 
   return (
     <TouchableOpacity
+      testID={`song-row-${song.id}`}
       onPress={() => onPress(song)}
       onLongPress={() => setShowActions(!showActions)}
       style={[styles.songItem, { borderBottomColor: theme.border }]}
@@ -63,6 +64,7 @@ export default function SongItem({
             <View style={styles.actionRow}>
               {onDelete && (
                 <TouchableOpacity
+                  testID={`song-delete-${song.id}`}
                   style={[styles.actionButton, { backgroundColor: '#ef4444' + '1A' }]}
                   onPress={(e) => {
                     stopProp(e);
@@ -104,6 +106,7 @@ export default function SongItem({
       <View style={styles.rightSection}>
         {onToggleFavorite && (
           <TouchableOpacity
+            testID={`song-favorite-${song.id}`}
             onPress={(e) => {
               stopProp(e);
               onToggleFavorite(song.id);

@@ -33,9 +33,10 @@ export default function FilterTabs({ activeTab, onTabPress, tabs }: FilterTabsPr
       contentContainerStyle={styles.container}
     >
       {items.map((item) => (
-        <TouchableOpacity
-          key={item.key}
-          onPress={() => onTabPress(item.key)}
+          <TouchableOpacity
+            key={item.key}
+            testID={`library-filter-${item.key}`}
+            onPress={() => onTabPress(item.key)}
           style={[
             styles.tab,
             activeTab === item.key

@@ -87,6 +87,7 @@ export default function ChordSheet({ content, transpose = 0, fontScale = DEFAULT
               <View key={segIndex} style={styles.chordGroup}>
                 {hasChords && (
                   <Text
+                    testID={`chord-${lineIndex}-${segIndex}`}
                     style={[
                       styles.chord,
                       {

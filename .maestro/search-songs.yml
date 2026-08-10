@@ -1,0 +1,18 @@
+appId: com.anonymous.digirepxyz
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: song-row-1
+    timeout: 10000
+- tapOn:
+    id: library-search-input
+- inputText: Bohemian
+- assertVisible:
+    id: song-row-1
+- assertNotVisible:
+    id: song-row-2
+- eraseText
+- assertVisible:
+    id: song-row-2

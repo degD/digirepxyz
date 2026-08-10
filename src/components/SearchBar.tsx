@@ -17,6 +17,7 @@ export default function SearchBar({ value, onChangeText }: SearchBarProps) {
       <View style={[styles.inputWrapper, { backgroundColor: theme.card }]}>
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
+          testID="library-search-input"
           style={[styles.input, { color: theme.textPrimary }]}
           placeholder={t('library.searchPlaceholder')}
           placeholderTextColor={theme.textSecondary}

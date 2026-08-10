@@ -1,0 +1,47 @@
+appId: com.anonymous.digirepxyz
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: bottom-nav-settings
+    timeout: 10000
+- tapOn:
+    id: bottom-nav-settings
+- assertVisible:
+    id: settings-dark-mode
+    checked: true
+- assertVisible:
+    id: settings-chord-diagrams
+    checked: false
+- assertVisible:
+    id: settings-auto-save
+    checked: true
+- tapOn:
+    id: settings-dark-mode
+- tapOn:
+    id: settings-chord-diagrams
+- tapOn:
+    id: settings-auto-save
+- assertVisible:
+    id: settings-dark-mode
+    checked: false
+- assertVisible:
+    id: settings-chord-diagrams
+    checked: true
+- assertVisible:
+    id: settings-auto-save
+    checked: false
+- stopApp
+- launchApp
+- tapOn:
+    id: bottom-nav-settings
+- assertVisible:
+    id: settings-dark-mode
+    checked: false
+- assertVisible:
+    id: settings-chord-diagrams
+    checked: true
+- assertVisible:
+    id: settings-auto-save
+    checked: false

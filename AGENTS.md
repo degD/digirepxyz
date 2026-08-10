@@ -135,5 +135,5 @@ The feature to work on will be given by user.
 6. (+) Cloud sync.
 7. Searching the web for songs.
 8. (+) Easy "share song" button.
-9. System tests.
+9. (+) System tests.
 10. Importing from images.

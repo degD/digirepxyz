@@ -1,0 +1,24 @@
+appId: com.anonymous.digirepxyz
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: song-row-1
+    timeout: 10000
+- tapOn:
+    id: song-row-1
+- assertVisible:
+    id: single-pane
+- tapOn:
+    id: viewer-split-toggle
+- assertVisible:
+    id: split-left
+- assertVisible:
+    id: split-right
+- assertNotVisible:
+    id: single-pane
+- tapOn:
+    id: viewer-split-toggle
+- assertVisible:
+    id: single-pane

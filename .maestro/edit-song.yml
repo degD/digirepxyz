@@ -1,0 +1,31 @@
+appId: com.anonymous.digirepxyz
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: song-row-1
+    timeout: 10000
+- tapOn:
+    id: song-row-1
+- tapOn:
+    id: viewer-edit
+- tapOn:
+    id: editor-title-input
+- eraseText
+- inputText: Edited Bohemian Rhapsody
+- tapOn:
+    id: editor-content-input
+- eraseText
+- inputText: "[C]Edited lyric"
+- tapOn:
+    id: editor-save
+- tapOn:
+    id: editor-back
+- assertVisible: Edited Bohemian Rhapsody
+- assertVisible: Edited lyric
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: Edited Bohemian Rhapsody
+    timeout: 10000

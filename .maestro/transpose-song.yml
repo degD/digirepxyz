@@ -1,0 +1,16 @@
+appId: com.anonymous.digirepxyz
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: song-row-1
+    timeout: 10000
+- tapOn:
+    id: song-row-1
+- assertVisible:
+    text: "^Bb$"
+- tapOn:
+    id: viewer-transpose-up
+- assertVisible:
+    text: "^B$"

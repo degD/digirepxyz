@@ -54,7 +54,7 @@ export default function ViewerScreenRoute() {
 
   if (!song) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
+      <SafeAreaView testID="viewer-screen" style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
         <View style={[styles.header, { borderBottomColor: theme.border }]}>
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Text style={[styles.backText, { color: theme.primary }]}>{t('editor.back')}</Text>
@@ -69,10 +69,10 @@ export default function ViewerScreenRoute() {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
+    <SafeAreaView testID="viewer-screen" style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.border }]}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+        <TouchableOpacity testID="viewer-back" onPress={handleBack} style={styles.backButton}>
           <Text style={[styles.backText, { color: theme.primary }]}>{t('editor.back')}</Text>
         </TouchableOpacity>
 
@@ -80,6 +80,7 @@ export default function ViewerScreenRoute() {
           <View style={styles.headerActions}>
             <View style={styles.readControls}>
               <TouchableOpacity
+                testID="viewer-favorite"
                 onPress={() => toggleFavorite(song.id)}
                 style={styles.favoriteButton}
               >
@@ -90,20 +91,22 @@ export default function ViewerScreenRoute() {
 
               <View style={styles.transposeControls}>
                 <TouchableOpacity
-                  testID="split-toggle"
-                  accessibilityLabel="split-toggle"
+                  testID="viewer-split-toggle"
+                  accessibilityLabel="viewer-split-toggle"
                   style={[styles.transposeButton, { borderColor: theme.border }, isSplit && { backgroundColor: theme.primary }]}
                   onPress={() => setIsSplit((prev) => !prev)}
                 >
                   <Text style={[styles.transposeButtonText, { color: isSplit ? '#ffffff' : theme.primary }]}>⇆</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
+                  testID="viewer-transpose-down"
                   style={[styles.transposeButton, { borderColor: theme.border }]}
                   onPress={() => setTransposeOffset((prev) => prev - 1)}
                 >
                   <Text style={[styles.transposeButtonText, { color: theme.primary }]}>-T</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
+                  testID="viewer-transpose-up"
                   style={[styles.transposeButton, { borderColor: theme.border }]}
                   onPress={() => setTransposeOffset((prev) => prev + 1)}
                 >
@@ -115,7 +118,7 @@ export default function ViewerScreenRoute() {
 
               <View style={styles.fontSizeControls}>
                 <TouchableOpacity
-                  testID="font-size-decrease"
+                  testID="viewer-font-size-decrease"
                   style={[
                     styles.transposeButton,
                     { borderColor: theme.border },
@@ -134,7 +137,7 @@ export default function ViewerScreenRoute() {
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  testID="font-size-increase"
+                  testID="viewer-font-size-increase"
                   style={[styles.transposeButton, { borderColor: theme.border }]}
                   onPress={increaseFontSize}
                 >
@@ -143,7 +146,7 @@ export default function ViewerScreenRoute() {
               </View>
             </View>
 
-            <TouchableOpacity style={[styles.editButton, { backgroundColor: theme.primary }]} onPress={handleEdit}>
+            <TouchableOpacity testID="viewer-edit" style={[styles.editButton, { backgroundColor: theme.primary }]} onPress={handleEdit}>
               <Text style={styles.editText}>{t('editor.edit')}</Text>
             </TouchableOpacity>
           </View>

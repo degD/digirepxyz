@@ -66,6 +66,7 @@ function SettingRow({
   switchValue,
   onToggle,
   theme,
+  testID,
 }: {
   icon: string;
   label: string;
@@ -75,6 +76,7 @@ function SettingRow({
   switchValue?: boolean;
   onToggle?: (val: boolean) => void;
   theme: any;
+  testID?: string;
 }) {
   return (
     <TouchableOpacity
@@ -89,6 +91,7 @@ function SettingRow({
       </View>
       {hasSwitch ? (
         <Switch
+          testID={testID}
           value={switchValue}
           onValueChange={onToggle}
           trackColor={{ false: theme.border, true: theme.primary + '80' }}
@@ -503,7 +506,7 @@ export default function SettingsScreenRoute() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
+    <SafeAreaView testID="settings-screen" style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>{t('settings.title')}</Text>
       </View>
@@ -524,6 +527,7 @@ export default function SettingsScreenRoute() {
             switchValue={settings.darkMode}
             onToggle={(val) => updateSetting('darkMode', val)}
             theme={theme}
+            testID="settings-dark-mode"
           />
           <SettingRow
             icon="🎨"
@@ -539,6 +543,7 @@ export default function SettingsScreenRoute() {
             switchValue={settings.showChordDiagrams}
             onToggle={(val) => updateSetting('showChordDiagrams', val)}
             theme={theme}
+            testID="settings-chord-diagrams"
           />
         </SettingSection>
 
@@ -551,6 +556,7 @@ export default function SettingsScreenRoute() {
             switchValue={settings.autoSave}
             onToggle={(val) => updateSetting('autoSave', val)}
             theme={theme}
+            testID="settings-auto-save"
           />
           <SettingRow
             icon="🌐"

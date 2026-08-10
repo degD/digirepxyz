@@ -1,0 +1,22 @@
+appId: com.anonymous.digirepxyz
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: song-row-1
+    timeout: 10000
+- longPressOn:
+    id: song-row-1
+- tapOn:
+    id: song-delete-1
+- assertNotVisible:
+    id: song-row-1
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: song-row-2
+    timeout: 10000
+- assertNotVisible:
+    id: song-row-1

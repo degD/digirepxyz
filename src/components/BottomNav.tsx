@@ -42,7 +42,12 @@ export default function BottomNav({ activeTab, onTabPress }: BottomNavProps) {
         const label = t(`nav.${item.key}`);
         const isActive = currentTab === item.key;
         return (
-          <TouchableOpacity key={item.key} style={styles.tab} onPress={() => handlePress(item)}>
+          <TouchableOpacity
+            key={item.key}
+            testID={`bottom-nav-${item.key}`}
+            style={styles.tab}
+            onPress={() => handlePress(item)}
+          >
             <Text style={[styles.icon, { color: isActive ? theme.primary : theme.textSecondary }]}>{item.icon}</Text>
             <Text style={[styles.label, { color: isActive ? theme.primary : theme.textSecondary }]}>{label}</Text>
           </TouchableOpacity>

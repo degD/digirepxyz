@@ -99,7 +99,7 @@ export default function LibraryScreenRoute() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
+    <SafeAreaView testID="library-screen" style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={[styles.headerIcon, { color: theme.primary }]}>♫</Text>
@@ -107,7 +107,7 @@ export default function LibraryScreenRoute() {
         </View>
         <View style={styles.headerRight}>
           <View style={[styles.songCountBadge, { backgroundColor: theme.primary + '1A' }]}>
-            <Text style={[styles.songCountText, { color: theme.primary }]}>
+            <Text testID="library-song-count" style={[styles.songCountText, { color: theme.primary }]}>
               {t('library.songsCount', { count: filteredSongs.length })}
             </Text>
           </View>

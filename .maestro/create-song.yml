@@ -1,0 +1,38 @@
+appId: com.anonymous.digirepxyz
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: create-song-fab
+    timeout: 10000
+- tapOn:
+    id: create-song-fab
+- tapOn:
+    id: editor-title-input
+- inputText: Maestro Created Song
+- tapOn:
+    id: editor-artist-input
+- inputText: System Test Artist
+- tapOn:
+    id: editor-content-input
+- inputText: "[C]Maestro created lyric"
+- tapOn:
+    id: editor-save
+- tapOn:
+    id: editor-back
+- assertVisible: 9 songs
+- tapOn:
+    id: library-search-input
+- inputText: Maestro Created Song
+- assertVisible: Maestro Created Song
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: library-search-input
+    timeout: 10000
+- tapOn:
+    id: library-search-input
+- inputText: Maestro Created Song
+- assertVisible: Maestro Created Song

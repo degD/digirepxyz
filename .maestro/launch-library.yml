@@ -1,0 +1,12 @@
+appId: com.anonymous.digirepxyz
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: song-row-1
+    timeout: 10000
+- assertVisible:
+    id: library-screen
+- assertVisible: Bohemian Rhapsody
+- assertVisible: 8 songs

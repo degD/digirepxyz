@@ -25,6 +25,16 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Android system tests
+
+The isolated Android system-test flows are in `.maestro/`. They cover the core library, song editing, viewer, favorite, deletion, and settings-persistence workflows against an installed app.
+
+1. Start an Android emulator.
+2. Install and launch the app with `bun run android`.
+3. In a separate terminal, run `bun run test:system`.
+
+Each flow clears app data before it runs. The Maestro CLI is required but is intentionally not an app dependency. See the [Maestro CLI installation guide](https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli).
+
 ## Get a fresh project
 
 When you're ready, run:
