@@ -1,66 +1,43 @@
-# Welcome to your Expo app 👋
+# DIGIREPXYZ
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A digital repertoire and chord management app for musicians. Manage the song library with tagging, favorites, ChordPro editing and viewing, transposition, guitar chord diagrams, and import/export. Built with [Expo v57](https://expo.dev). This project is a rewrite and continuation of [digirepx2](https://github.com/degD/digirepx2). The project is managed with [bun](https://bun.sh/). The target platform for this project is Android, as I don't have any motivation to support IOS or web right now. See de documentation for more info.
 
-## Get started
+## Features
 
-1. Install dependencies
+WIP
 
+## Images
+
+WIP
+
+## Development
+
+1. Clone this repository.
+
+2. Install dependencies: 
    ```bash
-   npm install
+   bun install
    ```
 
-2. Start the app
-
+3. Start the app:
    ```bash
-   npx expo start
+   bun run android
    ```
 
-In the output, you'll find options to open the app in a
+4. Run unit tests:
+   ```bash
+   bun run test
+   ```
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+5. Run Maestro tests:
+   ```bash
+   bun run test:system
+   ```
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Disclaimer
 
-## Android system tests
+One purpose of this project was to gain experience in quick app development using LLMs. I tried to make sure that the suggested code was appropriate and not *sloppy*. However, there could be hidden bugs or unnecessary code bloat. Use at your own risk. But I appreciate any help, let it be bug reports, fixes, features, or refactors. 
 
-The isolated Android system-test flows are in `.maestro/`. They cover the core library, song editing, viewer, favorite, deletion, and settings-persistence workflows against an installed app.
+## License
 
-1. Start an Android emulator.
-2. Install and launch the app with `bun run android`.
-3. In a separate terminal, run `bun run test:system`.
-
-Each flow clears app data before it runs. The Maestro CLI is required but is intentionally not an app dependency. See the [Maestro CLI installation guide](https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+WIP
