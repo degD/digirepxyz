@@ -40,15 +40,7 @@ Long-press a song in the Library and choose Export. The available options are:
 
 The filename is derived from the song title. Characters unsafe for filenames are replaced with underscores.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: Export options</strong><br>
-  <code>docs/images/user/export-options.png</code><br>
-  Capture the one-song export menu with ChordPro, PDF, Word, Share, and Cancel options.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
+![Single Export](../assets/single-export.png)
 
 ## Exporting the Library
 
@@ -79,16 +71,6 @@ Native builds can receive ChordPro files from another app:
 Files with no visible extension can be accepted when their contents contain recognized ChordPro directives or bracketed chords. Explicit unsupported extensions and invalid text are rejected.
 
 PDF and DOCX files are imported from Settings rather than Open With.
-
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: Android Open With</strong><br>
-  <code>docs/images/user/open-with.png</code><br>
-  Capture the operating-system file action that offers Digirepxyz for a ChordPro file.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
 
 ## Limitations
 

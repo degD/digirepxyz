@@ -24,16 +24,6 @@ Search is case-insensitive and updates while typing. It matches:
 
 Search does not currently match lyrics, ChordPro content, or tags. Search and the selected filter work together.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: Search and filters</strong><br>
-  <code>docs/images/user/library-search-filters.png</code><br>
-  Capture a search result with the filter bar and matching song rows visible.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
-
 ## Filters
 
 The horizontal filter bar contains:
@@ -64,15 +54,7 @@ Long-press a song row to reveal its actions:
 
 Delete happens immediately. There is no confirmation dialog or undo action, so export a song first if a backup is needed.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: Long-press actions</strong><br>
-  <code>docs/images/user/library-long-press.png</code><br>
-  Capture a song row after long-pressing it so Delete and Export are visible.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
+![Delete Song](../assets/delete-song.png)
 
 ## Empty Results
 

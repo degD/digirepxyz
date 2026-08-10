@@ -92,15 +92,7 @@ The system-test scripts generate:
 
 When a flow fails, inspect the failed command in the HTML report and then open its corresponding flow directory. `commands.json` records step order, status, duration, and error. Failed selector steps normally include a screenshot and screen hierarchy.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: Maestro failure report</strong><br>
-  <code>docs/images/development/maestro-report.png</code><br>
-  Add a report screenshot showing a failed command, screenshot artifact, and step details.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
+![Maestro Examplary Report](../assets/maestro-report.png)
 
 ## Test Design Rules
 

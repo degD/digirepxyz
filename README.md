@@ -4,6 +4,8 @@ A digital repertoire and chord management app for musicians. Manage songs with t
 
 The project is a rewrite and continuation of [digirepx2](https://github.com/degD/digirepx2). Android is the primary supported target; other platform code paths may have different behavior.
 
+![Library Screenshot](docs/assets/library-screenshot.png)
+
 ## Documentation
 
 - [Documentation index](docs/README.md)
@@ -21,16 +23,6 @@ The project is a rewrite and continuation of [digirepx2](https://github.com/degD
 - Gemini-assisted PDF, DOCX, and image conversion
 - Optional WebDAV synchronization
 - Dark mode, accent color, and multilingual interface
-
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: Digirepxyz overview</strong><br>
-  <code>docs/images/user/app-overview.png</code><br>
-  Add a representative Android screenshot showing the library and primary navigation.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
 
 ## Development
 

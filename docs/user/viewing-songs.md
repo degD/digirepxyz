@@ -14,15 +14,7 @@ The viewer displays:
 
 Tap Back to return to the previous screen. Tap Edit to open the same song in the editor.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: Standard viewer</strong><br>
-  <code>docs/images/user/song-viewer.png</code><br>
-  Capture a song with title, metadata, rendered chords, and lyrics visible.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
+![Viewer Screenshot](../assets/viewer.png)
 
 ## Transpose
 
@@ -50,15 +42,7 @@ Tap the split-view control to divide the song into two independently scrollable 
 
 The split point cannot be adjusted and does not follow musical sections. Split mode is temporary.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: Split view</strong><br>
-  <code>docs/images/user/song-viewer-split.png</code><br>
-  Capture both independently scrollable panes with chords and lyrics visible.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
+![Viewer-Split Screenshot](../assets/viewer-split.png)
 
 ## Guitar Chord Diagrams
 
@@ -69,15 +53,7 @@ Enable Chord Diagrams under Settings. The viewer then shows recognized unique ch
 - A voicing counter indicates the selected shape when multiple shapes exist.
 - Diagrams follow the currently displayed transposition.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: Chord diagrams</strong><br>
-  <code>docs/images/user/chord-diagrams.png</code><br>
-  Capture the diagram row and a chord with its voicing counter visible.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
+![Viewer with Chord Diagrams](../assets/chord-diagrams.png)
 
 ## Missing Songs
 

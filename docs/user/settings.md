@@ -18,15 +18,7 @@ Chord Diagrams controls whether recognized guitar diagrams appear in the viewer.
 
 The default appearance uses dark mode, a blue accent, and diagrams disabled.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: Appearance settings</strong><br>
-  <code>docs/images/user/appearance-settings.png</code><br>
-  Capture the Dark Mode, Chord Color, and Chord Diagrams controls.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
+![Appearance Settings](../assets/appearance-settings.png)
 
 ## Behavior
 

@@ -40,15 +40,7 @@ Provider responsibilities:
 
 This ordering matters. Sync depends on the song library, and native incoming files must not be imported before library hydration finishes.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Diagram: Provider and routing architecture</strong><br>
-  <code>docs/images/development/provider-routing.png</code><br>
-  Add a diagram showing provider nesting, hydration, and route navigation.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
+![Diagram of Architecture](../assets/architecture.png)
 
 ## Routes
 

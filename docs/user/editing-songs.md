@@ -27,15 +27,7 @@ Tags are converted to lowercase. Add a tag by typing it and pressing the keyboar
 
 The editor does not have a separate original-key field. A `{key: G}` directive in the content renders a key label in the viewer, but it does not populate the library key badge automatically.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: Song editor</strong><br>
-  <code>docs/images/user/song-editor.png</code><br>
-  Capture the title, artist, tags, ChordPro content area, undo/redo controls, font controls, and Save button.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
+![Song Editor Screenshot](../assets/editor-edit.png)
 
 ## ChordPro Basics
 
@@ -71,15 +63,7 @@ Tap the Chord button in the editor header to open the assisted picker:
 
 The generated chord is inserted in brackets at the current text cursor position. The picker uses sharp-spelled roots and supports common qualities including Major, Minor, 7, maj7, min7, dim, sus4, aug, 6, and m9.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: Chord picker</strong><br>
-  <code>docs/images/user/chord-picker.png</code><br>
-  Capture the root, quality, extension choices, and Apply action.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
+![Chord Picker](../assets/chord-picker.png)
 
 ## Undo and Redo
 

@@ -21,15 +21,7 @@ On a new installation, the library starts with eight sample songs. These songs d
 
 Songs and ordinary settings are stored locally by default. Optional WebDAV synchronization and AI imports send data to external services only when those features are configured and used.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: Main library</strong><br>
-  <code>docs/images/user/library-overview.png</code><br>
-  Capture the initial library with the search field, filter tabs, song rows, and bottom navigation visible.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
+![Screenshot Library](../assets/library-screenshot.png)
 
 ## Main Navigation
 

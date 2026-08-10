@@ -25,15 +25,7 @@ Open Settings and find WebDAV Sync:
 
 The URL must use HTTPS, and all three fields are required. The first synchronization downloads an existing snapshot when one is present, merges it with the local library, and uploads the result.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: WebDAV configuration</strong><br>
-  <code>docs/images/user/webdav-settings.png</code><br>
-  Capture the WebDAV URL, username, password, Save and sync, Sync now, and Disconnect controls.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
+![WebDAV Configuration](../assets/webdav-setup.png)
 
 ## Automatic and Manual Sync
 

@@ -23,15 +23,7 @@ Open Settings and find the AI Import section:
 
 On Android, the key is stored with Expo SecureStore. On web, it is stored in session storage and is therefore limited to the browser session.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: AI Import setup</strong><br>
-  <code>docs/images/user/ai-import-setup.png</code><br>
-  Capture the API-key field, visibility control, and Save API key action.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
+![AI Import Setup](../assets/ai-import-setup.png)
 
 ## Import One File
 
@@ -50,15 +42,7 @@ Review the generated song in the editor because AI conversion can misread lyrics
 
 Keep the app in the foreground. Leaving the app interrupts the request.
 
-<!-- IMAGE PLACEHOLDER START -->
-<div align="center">
-  <br><br>
-  <strong>Screenshot: AI import progress</strong><br>
-  <code>docs/images/user/ai-import-progress.png</code><br>
-  Capture the blocking import progress state while a document is being converted.
-  <br><br>
-</div>
-<!-- IMAGE PLACEHOLDER END -->
+![AI Import Progress](../assets/ai-import-progress.png)
 
 ## Import a Folder
 
