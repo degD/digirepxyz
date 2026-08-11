@@ -30,6 +30,7 @@ Start with [Development getting started](development/getting-started.md), then u
 - [Architecture and routing](development/architecture.md)
 - [Storage and synchronization](development/storage-and-sync.md)
 - [Import and export internals](development/import-export.md)
+- [Standalone tools](development/tools.md)
 - [Native configuration](development/native-configuration.md)
 - [Testing](development/testing.md)
 - [Contributing](development/contributing.md)
