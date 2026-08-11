@@ -56,4 +56,4 @@ One purpose of this project was to gain experience in quick app development usin
 
 ## License
 
-The project does not currently declare a license.
+MIT

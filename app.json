@@ -2,67 +2,15 @@
   "expo": {
     "name": "digirepxyz",
     "slug": "digirepxyz",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "orientation": "default",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/icon-new.png",
     "scheme": "digirepxyz",
     "userInterfaceStyle": "automatic",
-    "ios": {
-      "icon": "./assets/expo.icon",
-      "infoPlist": {
-        "UTImportedTypeDeclarations": [
-          {
-            "UTTypeIdentifier": "org.chordpro.chordpro",
-            "UTTypeDescription": "ChordPro document",
-            "UTTypeConformsTo": [
-              "public.text"
-            ],
-            "UTTypeTagSpecification": {
-              "public.filename-extension": [
-                "cho",
-                "chordpro"
-              ],
-              "public.mime-type": [
-                "application/x-chordpro",
-                "text/x-chordpro"
-              ]
-            }
-          }
-        ],
-        "CFBundleDocumentTypes": [
-          {
-            "CFBundleTypeName": "ChordPro document",
-            "CFBundleTypeRole": "Viewer",
-            "LSHandlerRank": "Owner",
-            "LSItemContentTypes": [
-              "org.chordpro.chordpro"
-            ],
-            "CFBundleTypeExtensions": [
-              "cho",
-              "chordpro"
-            ]
-          },
-          {
-            "CFBundleTypeName": "Song image",
-            "CFBundleTypeRole": "Viewer",
-            "LSHandlerRank": "Alternate",
-            "LSItemContentTypes": [
-              "public.png",
-              "public.jpeg",
-              "org.webmproject.webp",
-              "public.heic",
-              "public.heif"
-            ]
-          }
-        ]
-      }
-    },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#111111",
+        "foregroundImage": "./assets/images/icon-new.png",
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.digirepxyz",
@@ -148,8 +96,8 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
+          "backgroundColor": "#111111",
+          "image": "./assets/images/icon-new.png",
           "imageWidth": 76
         }
       ],

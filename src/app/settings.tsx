@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { AppState, View, Text, TouchableOpacity, ScrollView, Switch, StyleSheet, Modal, Platform, TextInput, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { SymbolView } from 'expo-symbols';
-import { Host, Slider } from '@expo/ui';
-import { useTranslation } from '@/i18n';
-import { useSettings, CHORD_COLORS } from '@/context/SettingsContext';
-import { useSongs } from '@/context/SongsContext';
-import { useSync } from '@/context/SyncContext';
 import BottomNav from '@/components/BottomNav';
 import ExportOptionsModal from '@/components/ExportOptionsModal';
-import { exportLibrary, triggerFileImport } from '@/utils/dataUtils';
-import type { ExportMethod } from '@/utils/dataUtils';
+import { CHORD_COLORS, useSettings } from '@/context/SettingsContext';
+import { useSongs } from '@/context/SongsContext';
+import { useSync } from '@/context/SyncContext';
+import { useTranslation } from '@/i18n';
+import type { BulkDocumentImportProgress } from '@/types/documentImport';
 import { ChordColorName } from '@/types/settings';
 import { getGeminiApiKey, saveGeminiApiKey } from '@/utils/apiKeyStorage';
+import type { ExportMethod } from '@/utils/dataUtils';
+import { exportLibrary, triggerFileImport } from '@/utils/dataUtils';
 import { importDocumentAsSong, importDocumentsAsSongs, pickDocumentDirectoryForImport, pickDocumentForImport } from '@/utils/documentImport';
-import type { BulkDocumentImportProgress } from '@/types/documentImport';
+import { Host, Slider } from '@expo/ui';
+import { SymbolView } from 'expo-symbols';
+import React, { useState } from 'react';
+import { ActivityIndicator, AppState, Modal, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const LANG_OPTIONS = [
   { code: 'en', label: 'English' },
@@ -719,7 +719,7 @@ export default function SettingsScreenRoute() {
         </SettingSection>
 
         <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: theme.textSecondary }]}>Repertoire v1.0.0 (Expo SDK 57)</Text>
+          <Text style={[styles.footerText, { color: theme.textSecondary }]}>DigirepXYZ v0.1.0</Text>
         </View>
       </ScrollView>
 
